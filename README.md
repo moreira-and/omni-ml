@@ -45,7 +45,7 @@ flowchart LR
 
 ```bash
 
-poetry env use python
+poetry config virtualenvs.in-project true --local
 poetry install
 
 ```
