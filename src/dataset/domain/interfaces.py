@@ -1,8 +1,17 @@
 from abc import ABC, abstractmethod
+from datetime import datetime
+from typing import Iterable
 
-from src.dataset.domain.value_objects import Batch
+from .entities import IPriceBarFact
 
 
-class Dataset(ABC):
+class PriceReadRepository(ABC):
     @abstractmethod
-    def load(self) -> Batch: ...
+    def get_prices(
+        self,
+        *,
+        ticker: str,
+        bar: str,
+        start: datetime,
+        end: datetime | None = None,
+    ) -> Iterable[IPriceBarFact]: ...
