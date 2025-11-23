@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from datetime import datetime
 from typing import Iterable
 
-from .entities import IPriceBarFact
+from .entities import MacroeconomicIndicatorFact, PriceBarFact
 
 
 class PriceReadRepository(ABC):
@@ -11,7 +11,18 @@ class PriceReadRepository(ABC):
         self,
         *,
         ticker: str,
-        bar: str,
+        interval: str,
         start: datetime,
         end: datetime | None = None,
-    ) -> Iterable[IPriceBarFact]: ...
+    ) -> Iterable[PriceBarFact]: ...
+
+
+class IndicatorReadRepository(ABC):
+    @abstractmethod
+    def get_indicator(
+        self,
+        *,
+        name: str,
+        start: datetime,
+        end: datetime | None = None,
+    ) -> Iterable[MacroeconomicIndicatorFact]: ...

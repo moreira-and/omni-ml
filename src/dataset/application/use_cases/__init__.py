@@ -1,3 +1,3 @@
-from .get_prices import GetPrices
+from .get_prices import GetPricesMultipleTickers
 
-__all__ = ["GetPrices"]
+__all__ = ["GetPricesMultipleTickers"]

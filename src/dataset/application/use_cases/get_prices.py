@@ -3,22 +3,29 @@ from datetime import datetime
 from typing import Iterable
 
 from src.dataset.application.dtos import PricesQueryDto
-from src.dataset.domain.entities import IPriceBarFact
+from src.dataset.domain.entities import PriceBarFact
 from src.dataset.domain.interfaces import PriceReadRepository
 
 
-class GetPrices:
+class GetPricesMultipleTickers:
     def __init__(self, price_repo: PriceReadRepository) -> None:
         self._price_repo = price_repo
 
     def get_prices(
         self,
         query: PricesQueryDto,
-    ) -> Iterable[IPriceBarFact]:
+    ) -> Iterable[PriceBarFact]:
         # aqui é só orquestração de domínio
-        return self._price_repo.get_prices(
-            ticker=query.ticker,
-            bar=query.bar,
-            start=query.start,
-            end=query.end,
-        )
+
+        result: Iterable[PriceBarFact] = []
+
+        for ticker in query.tickers:
+            partial_result = self._price_repo.get_prices(
+                ticker=ticker,
+                interval=query.interval,
+                start=query.start,
+                end=query.end,
+            )
+            result = list(result) + list(partial_result)
+
+        return result

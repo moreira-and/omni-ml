@@ -6,7 +6,7 @@ from loguru import logger
 import pandas as pd
 import yfinance as yf
 
-from src.dataset.domain.entities import IPriceBarFact
+from src.dataset.domain.entities import PriceBarFact
 from src.dataset.domain.interfaces import PriceReadRepository
 
 
@@ -18,10 +18,10 @@ class YfinancePrice(PriceReadRepository):
         self,
         *,
         ticker: str,
-        bar: str,
+        interval: str,
         start: datetime,
         end: datetime | None = None,
-    ) -> Iterable[IPriceBarFact]:
+    ) -> Iterable[PriceBarFact]:
         """
         Adapter de infraestrutura:
         - Usa yfinance (Pandas) internamente
@@ -33,14 +33,14 @@ class YfinancePrice(PriceReadRepository):
                 start=start,
                 end=end,
                 auto_adjust=True,
-                interval=bar,
+                interval=interval,
                 progress=False,
             )
 
             if df.empty:
                 logger.warning(
                     f"[PriceYfinance] No data returned for "
-                    f"ticker={ticker}, bar={bar}, "
+                    f"ticker={ticker}, bar={interval}, "
                     f"start={start}, end={end}"
                 )
                 return []
@@ -63,7 +63,7 @@ class YfinancePrice(PriceReadRepository):
                     df.columns = df.columns.get_level_values(0)
 
             # itertuples é mais eficiente que iterrows
-            results: List[IPriceBarFact] = []
+            results: List[PriceBarFact] = []
             for ts, row in zip(idx, df.itertuples(index=False), strict=False):
                 # row.<col> vem como float; convertemos para Decimal
                 close = Decimal(str(row.Close))
@@ -77,9 +77,9 @@ class YfinancePrice(PriceReadRepository):
                     volume = int(row.Volume)
 
                 results.append(
-                    IPriceBarFact(
+                    PriceBarFact(
                         ticker=ticker,
-                        bar=bar,
+                        interval=interval,
                         ts=ts.to_pydatetime(),  # já em UTC
                         close=close,
                         open=open_,
@@ -94,7 +94,7 @@ class YfinancePrice(PriceReadRepository):
         except Exception as e:
             logger.error(
                 f"[PriceYfinance] Error loading yfinance data for "
-                f"ticker={ticker}, bar={bar}, "
+                f"ticker={ticker}, bar={interval}, "
                 f"start={start}, end={end}: {e}"
             )
             raise
