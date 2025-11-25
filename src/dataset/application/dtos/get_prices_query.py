@@ -5,7 +5,7 @@ from typing import List
 
 @dataclass(frozen=True)
 class PricesQueryDto:
-    tickers: List[str]
+    codes: List[str]
     interval: str
     start: datetime
     end: datetime | None = None

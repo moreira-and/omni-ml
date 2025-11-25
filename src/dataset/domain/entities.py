@@ -1,129 +1,117 @@
+"""
+Domain: Dataset / Market
+
+Este módulo define as entidades de domínio centrais relacionadas a ativos financeiros
+e países, usadas como raiz de agregados para associar séries de preços (PriceBarFact)
+e indicadores macroeconômicos (MacroeconomicIndicatorFact).
+
+Ubiquitous language:
+- FinancialAsset: representa um ativo negociado identificado por código em bolsa.
+- Country: representa um país emissor / mercado, associado a indicadores macroeconômicos.
+"""
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from datetime import datetime
-from decimal import Decimal
 from typing import Optional
 from uuid import UUID, uuid4
 
+from src.dataset.domain.value_objects import (
+    AssetIndicatorFact,
+    MacroeconomicIndicatorFact,
+    PriceBarFact,
+)
 
-@dataclass(frozen=True, slots=True)
-class PriceBarFact:
-    ticker: str  # ex.: "AAPL", "MSFT"
-    interval: str  # ex.: "1min" | "5min" | "1h" | "1d"
-    ts: datetime  # período de referência (normalizado para "period end" UTC, precisão em minutos)
-    close: Decimal
-    open: Optional[Decimal] = None
-    high: Optional[Decimal] = None
-    low: Optional[Decimal] = None
-    volume: Optional[int] = None
-    id: UUID = field(default_factory=uuid4)
-
-    def body(self) -> Decimal:
-        return self.close - self.open
-
-    def is_bullish(self) -> bool:
-        return self.close > self.open
-
-    def __post_init__(self):
-        # Invariantes de preço/volume
-        if self.close < 0:
-            raise ValueError("close cannot be negative.")
-        if self.volume is not None and self.volume < 0:
-            raise ValueError("volume cannot be negative.")
-        if self.high is not None and self.low is not None and self.high < self.low:
-            raise ValueError("high cannot be lower than low.")
-        # Se open/high/low existem, verifique inclusão do close
-        if self.low is not None and self.close < self.low:
-            raise ValueError("close cannot be below low.")
-        if self.high is not None and self.close > self.high:
-            raise ValueError("close cannot be above high.")
-        if self.open is not None and self.low is not None and self.high is not None:
-            if not (self.low <= self.open <= self.high):
-                raise ValueError("open must lie within [low, high].")
-
-
-from dataclasses import dataclass, field
-from datetime import datetime
-from decimal import Decimal, InvalidOperation
-import re
-from typing import ClassVar
-from uuid import UUID, uuid4
-
-
-@dataclass(frozen=True, slots=True)
-class MacroeconomicIndicatorFact:
-    country: str  # ex.: "BRAZIL", "USA"
-    ts: datetime  # período de referência (UTC, precisão em minutos)
-    name: str  # ex.: "SELIC", "CPI", "GDP"
-    value: Decimal
-    id: UUID = field(default_factory=uuid4)
-
-    # Regras do domínio (não são dados, são constantes da classe)
-    _ALLOWED_INTERVALS: ClassVar[set[str]] = {
-        # intraday
-        "1min",
-        "5min",
-        "15min",
-        "30min",
-        "1h",
-        "4h",
-        # diário / maior
-        "1d",
-        "1wk",
-        "1mo",
-        "3mo",
-        "6mo",
-        "1y",
+DOMAIN_SCHEMA = """
+{
+  "bounded_context": "dataset.market",
+  "entities": {
+    "Asset": {
+      "role": "aggregate_root",
+      "identity": ["code", "exchange"],
+      "relations": {
+        "prices": "list[PriceBarFact]",
+        "indicators": "list[AssetIndicatorFact]"
+      }
+    },
+    "Country": {
+      "role": "aggregate_root",
+      "identity": ["code"],
+      "relations": {
+        "indicators": "list[MacroeconomicIndicatorFact]"
+      }
     }
+  }
+}
+"""
 
-    # Convenção de nome de indicador (opcional, mas saudável):
-    # letras, dígitos, underscore, ponto e hífen (ex.: "SMA_20", "RSI.14", "MACD-12_26_9")
-    _NAME_PATTERN: ClassVar[re.Pattern[str]] = re.compile(r"^[A-Z0-9_.\-]+$")
 
-    def __post_init__(self) -> None:
-        # --- ticker ---
-        if not self.country or not self.country.strip():
-            raise ValueError("IndicatorFact.ticker não pode ser vazio.")
+@dataclass(frozen=True, slots=True)
+class Asset:
+    """Financial asset aggregate root.
 
-        ticker_norm = self.country.strip().upper()
-        if ticker_norm != self.country:
-            object.__setattr__(self, "ticker", ticker_norm)
+    Representa um ativo financeiro identificado por um código (ticker),
+    podendo estar associado a uma bolsa, moeda e séries de preços / indicadores.
 
-        # --- name ---
-        if not self.name or not self.name.strip():
-            raise ValueError("IndicatorFact.name não pode ser vazio.")
+    Attributes:
+        code:
+            Código único do ativo no mercado (ticker), ex.: "AAPL", "PETR4".
+            Deve ser único dentro de um mesmo `exchange`.
+        name:
+            Nome descritivo do ativo, ex.: "Apple Inc.", "Petrobras PN".
+        exchange:
+            Identificador da bolsa/mercado onde o ativo é negociado,
+            ex.: "NASDAQ", "NYSE", "B3".
+        currency:
+            Código da moeda base de negociação do ativo, ex.: "USD", "BRL".
+        prices:
+            Coleção de barras de preço históricas (`PriceBarFact`) associadas a este ativo.
+            Pode ser `None` quando o agregado é carregado sem histórico.
+        indicators:
+            Coleção de indicadores macroeconômicos (`MacroeconomicIndicatorFact`)
+            relevantes para este ativo (ex.: juros, inflação).
+        id:
+            Identificador interno imutável do agregado (UUID v4).
+    """
 
-        name_norm = self.name.strip().upper()
-        if not self._NAME_PATTERN.match(name_norm):
-            raise ValueError(
-                f"IndicatorFact.name inválido: {self.name!r}. "
-                "Use apenas [A-Z0-9_.-], ex.: 'SMA_20', 'RSI_14'."
-            )
-        if name_norm != self.name:
-            object.__setattr__(self, "name", name_norm)
+    code: str  # ex.: "AAPL", "MSFT"
+    name: Optional[str] = None  # ex.: "Apple Inc.", "Microsoft Corporation"
+    exchange: Optional[str] = None  # ex.: "NASDAQ", "NYSE"
+    currency: Optional[str] = None  # ex.: "BRL", "USD"
+    prices: Optional[list[PriceBarFact]] = None  # Historical price data
+    indicators: Optional[list[AssetIndicatorFact]] = None  # Related indicators
+    id: UUID = field(default_factory=uuid4)
 
-        # --- ts: UTC, precisão em minutos ---
-        if self.ts.tzinfo is None or self.ts.utcoffset() is None:
-            raise ValueError("IndicatorFact.ts deve ser timezone-aware em UTC.")
 
-        if self.ts.second != 0 or self.ts.microsecond != 0:
-            raise ValueError(
-                "IndicatorFact.ts deve ter precisão em minutos "
-                "(second == 0 e microsecond == 0)."
-            )
+@dataclass(frozen=True, slots=True)
+class Country:
+    """Country aggregate root.
 
-        # --- value: Decimal válido e finito ---
-        if not isinstance(self.value, Decimal):
-            try:
-                normalized = Decimal(str(self.value))
-            except (InvalidOperation, TypeError) as e:
-                raise ValueError(f"IndicatorFact.value inválido: {self.value!r}") from e
-            object.__setattr__(self, "value", normalized)
+    Representa um país e seus metadados relevantes para o domínio financeiro,
+    incluindo moeda, séries de preços agregadas e indicadores macroeconômicos.
 
-        if self.value.is_nan() or not self.value.is_finite():
-            raise ValueError(f"IndicatorFact.value deve ser finito, recebido: {self.value!r}")
+    Attributes:
+        code:
+            Código ISO 3166-1 alfa-2 do país, ex.: "BR", "US".
+        name:
+            Nome do país em maiúsculas ou em inglês, ex.: "BRAZIL", "UNITED STATES".
+        currency:
+            Código da moeda oficial principal, ex.: "BRL", "USD".
+        prices:
+            Séries de preços agregadas relacionadas ao país (quando aplicável),
+            representadas por `PriceBarFact`.
+        indicators:
+            Indicadores macroeconômicos nacionais (`MacroeconomicIndicatorFact`),
+            ex.: PIB, inflação, taxa de juros.
+        id:
+            Identificador interno imutável do agregado (UUID v4).
+    """
 
-        # --- id ---
-        if not isinstance(self.id, UUID):
-            raise ValueError("IndicatorFact.id deve ser um UUID válido.")
+    code: Optional[str]  # ex.: "BR", "US"
+    name: Optional[str] = None  # ex.: "BRAZIL", "USA"
+    currency: Optional[str] = None  # ex.: "BRL", "USD"
+    prices: Optional[list[PriceBarFact]] = None  # Price data for assets in the country
+    indicators: Optional[list[MacroeconomicIndicatorFact]] = (
+        None  # Macroeconomic indicators for the country
+    )
+    id: UUID = field(default_factory=uuid4)

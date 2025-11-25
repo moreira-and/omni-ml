@@ -1,10 +1,8 @@
-# src/dataset/application/use_cases/get_prices_uc.py
-from datetime import datetime
 from typing import Iterable
 
 from src.dataset.application.dtos import PricesQueryDto
-from src.dataset.domain.entities import PriceBarFact
 from src.dataset.domain.interfaces import PriceReadRepository
+from src.dataset.domain.value_objects import PriceBarFact
 
 
 class GetPricesMultipleTickers:
@@ -19,9 +17,9 @@ class GetPricesMultipleTickers:
 
         result: Iterable[PriceBarFact] = []
 
-        for ticker in query.tickers:
+        for ticker in query.codes:
             partial_result = self._price_repo.get_prices(
-                ticker=ticker,
+                code=ticker,
                 interval=query.interval,
                 start=query.start,
                 end=query.end,

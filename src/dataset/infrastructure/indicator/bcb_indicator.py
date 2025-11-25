@@ -8,8 +8,8 @@ from typing import Iterable, Optional
 from loguru import logger
 import requests
 
-from src.dataset.domain.entities import MacroeconomicIndicatorFact
 from src.dataset.domain.interfaces import IndicatorReadRepository
+from src.dataset.domain.value_objects import MacroeconomicIndicatorFact
 
 
 class BcbIndicator(IndicatorReadRepository):

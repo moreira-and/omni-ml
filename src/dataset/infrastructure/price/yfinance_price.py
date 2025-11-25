@@ -6,8 +6,8 @@ from loguru import logger
 import pandas as pd
 import yfinance as yf
 
-from src.dataset.domain.entities import PriceBarFact
 from src.dataset.domain.interfaces import PriceReadRepository
+from src.dataset.domain.value_objects import PriceBarFact
 
 
 class YfinancePrice(PriceReadRepository):
@@ -17,7 +17,7 @@ class YfinancePrice(PriceReadRepository):
     def get_prices(
         self,
         *,
-        ticker: str,
+        code: str,
         interval: str,
         start: datetime,
         end: datetime | None = None,
@@ -29,7 +29,7 @@ class YfinancePrice(PriceReadRepository):
         """
         try:
             df = yf.download(
-                ticker,
+                code,
                 start=start,
                 end=end,
                 auto_adjust=True,
@@ -40,7 +40,7 @@ class YfinancePrice(PriceReadRepository):
             if df.empty:
                 logger.warning(
                     f"[PriceYfinance] No data returned for "
-                    f"ticker={ticker}, bar={interval}, "
+                    f"ticker={code}, bar={interval}, "
                     f"start={start}, end={end}"
                 )
                 return []
@@ -78,7 +78,7 @@ class YfinancePrice(PriceReadRepository):
 
                 results.append(
                     PriceBarFact(
-                        ticker=ticker,
+                        code=code,
                         interval=interval,
                         ts=ts.to_pydatetime(),  # já em UTC
                         close=close,
@@ -94,7 +94,7 @@ class YfinancePrice(PriceReadRepository):
         except Exception as e:
             logger.error(
                 f"[PriceYfinance] Error loading yfinance data for "
-                f"ticker={ticker}, bar={interval}, "
+                f"ticker={code}, bar={interval}, "
                 f"start={start}, end={end}: {e}"
             )
             raise
