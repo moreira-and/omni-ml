@@ -2,20 +2,23 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 from decimal import Decimal, InvalidOperation
-import time
-from typing import Iterable, Optional
+from typing import Iterable, List, Optional
 
 from loguru import logger
 import requests
 
-from src.dataset.domain.interfaces import IndicatorReadRepository
-from src.dataset.domain.value_objects import MacroeconomicIndicatorFact
+from src.dataset.domain.interfaces import CountryIndicatorReadRepository
+from src.dataset.domain.value_objects import CountryIndicator
 
 
-class BcbIndicator(IndicatorReadRepository):
+class BcbIndicator(CountryIndicatorReadRepository):
     """
     Adapter para a API de séries temporais do BCB (SGS).
-    Converte JSON -> IndicatorFact sem expor DataFrame.
+    Converte JSON -> CountryIndicator sem expor DataFrame.
+
+    Contexto de domínio:
+        - Fonte: Banco Central do Brasil (SGS).
+        - Escopo: indicadores macroeconômicos do país "BR".
     """
 
     def __init__(
@@ -28,15 +31,42 @@ class BcbIndicator(IndicatorReadRepository):
         self._base_url = base_url.rstrip("/")
         self._session = session or requests.Session()
 
-    def get_indicator(
+    def get_country_indicators(
         self,
         *,
+        country_code: str,
         name: str,
         start: datetime,
         end: datetime | None = None,
-    ) -> Iterable[MacroeconomicIndicatorFact]:
+    ) -> Iterable[CountryIndicator]:
+        """
+        Implementação de CountryIndicatorReadRepository para o país BR.
 
-        logger.info(f"[BcbIndicator] Downloading {name} from the Central Bank of Brazil API...")
+        Args:
+            country_code:
+                Código do país (ISO 3166-1 alfa-2). Atualmente só "BR" é suportado.
+            name:
+                Nome lógico do indicador (ex.: "SELIC", "IPCA_Mensal").
+            start:
+                Data inicial (inclusiva) da janela.
+            end:
+                Data final (opcional). Quando None, usa data atual em UTC.
+
+        Returns:
+            Iterable[CountryIndicator]:
+                Pontos da série temporal do indicador.
+        """
+        if country_code.upper() != "BR":
+            logger.warning(
+                f"[BcbIndicator] country_code={country_code!r} não suportado. "
+                "A implementação atual suporta apenas 'BR'."
+            )
+            return []
+
+        logger.info(
+            f"[BcbIndicator] Downloading {name} for country={country_code} "
+            f"from the Central Bank of Brazil API..."
+        )
 
         sgs_code = self._get_code_by_name(name=name) or name
 
@@ -46,7 +76,11 @@ class BcbIndicator(IndicatorReadRepository):
             end=end,
         )
 
-        facts = self._dicts_to_entities(raw_data=raw_data, name=name)
+        facts = self._dicts_to_entities(
+            raw_data=raw_data,
+            country_code=country_code.upper(),
+            name=name,
+        )
 
         return facts
 
@@ -58,7 +92,10 @@ class BcbIndicator(IndicatorReadRepository):
         end: datetime | None,
     ) -> list[dict]:
         """
-        Retorna: [{ "data": "01/01/2000", "valor": "10.5" }, ...]
+        Chama a API do BCB/SGS e retorna a lista crua de registros.
+
+        Retorno esperado:
+            [{ "data": "01/01/2000", "valor": "10.5" }, ...]
         """
         start_str = start.strftime("%d/%m/%Y")
         end_str = (end or datetime.now(tz=timezone.utc)).strftime("%d/%m/%Y")
@@ -89,7 +126,7 @@ class BcbIndicator(IndicatorReadRepository):
 
     def _get_code_by_name(self, name: str) -> Optional[str]:
         """
-        Mapeia nomes comuns para códigos SGS do BCB.
+        Mapeia nomes lógicos de domínio para códigos SGS do BCB.
         Exemplo: "SELIC" -> "11"
         """
         name_to_code = {
@@ -112,14 +149,20 @@ class BcbIndicator(IndicatorReadRepository):
         return name_to_code.get(name)
 
     def _dicts_to_entities(
-        self, raw_data: list[dict], name: str
-    ) -> list[MacroeconomicIndicatorFact]:
-
+        self,
+        *,
+        raw_data: list[dict],
+        country_code: str,
+        name: str,
+    ) -> list[CountryIndicator]:
+        """
+        Converte a lista de dicts da API SGS -> CountryIndicator.
+        """
         if not raw_data:
             logger.warning(f"[BcbIndicator] No data returned for {name}")
             return []
 
-        results: list[MacroeconomicIndicatorFact] = []
+        results: list[CountryIndicator] = []
 
         for item in raw_data:
             try:
@@ -137,8 +180,8 @@ class BcbIndicator(IndicatorReadRepository):
                 continue
 
             results.append(
-                MacroeconomicIndicatorFact(
-                    country="BR",
+                CountryIndicator(
+                    country_code=country_code,
                     name=name,
                     ts=ts,
                     value=value,
@@ -148,7 +191,7 @@ class BcbIndicator(IndicatorReadRepository):
         return results
 
     @staticmethod
-    def valid_tickers():
+    def valid_indicators() -> List[str]:
         return [
             "SELIC",
             "CDI",

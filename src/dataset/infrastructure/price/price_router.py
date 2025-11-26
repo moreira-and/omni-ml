@@ -1,8 +1,8 @@
-from src.dataset.domain.interfaces import PriceReadRepository
+from src.dataset.domain.interfaces import AssetPriceReadRepository
 from src.dataset.infrastructure.price.yfinance_price import YfinancePrice
 
 
-def price_router(ticker: str) -> PriceReadRepository:
+def price_router(ticker: str) -> AssetPriceReadRepository:
     match ticker:
         case t if t in YfinancePrice.valid_tickers():
             return YfinancePrice()
