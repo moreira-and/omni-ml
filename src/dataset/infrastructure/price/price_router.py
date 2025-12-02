@@ -1,4 +1,6 @@
-from src.dataset.domain.interfaces import AssetPriceReadRepository
+from src.dataset.domain.interfaces.economic_unit_repository import (
+    AssetPriceReadRepository,
+)
 from src.dataset.infrastructure.price.yfinance_price import YfinancePrice
 
 

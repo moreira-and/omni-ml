@@ -6,7 +6,9 @@ from loguru import logger
 import pandas as pd
 import yfinance as yf
 
-from src.dataset.domain.interfaces import AssetPriceReadRepository
+from src.dataset.domain.interfaces.economic_unit_repository import (
+    AssetPriceReadRepository,
+)
 from src.dataset.domain.value_objects import AssetListing, AssetPrice
 
 

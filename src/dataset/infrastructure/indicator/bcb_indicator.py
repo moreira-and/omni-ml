@@ -7,7 +7,9 @@ from typing import Iterable, List, Optional
 from loguru import logger
 import requests
 
-from src.dataset.domain.interfaces import CountryIndicatorReadRepository
+from src.dataset.domain.interfaces.economic_unit_repository import (
+    CountryIndicatorReadRepository,
+)
 from src.dataset.domain.value_objects import CountryIndicator
 
 
