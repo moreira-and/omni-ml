@@ -4,7 +4,51 @@
     <img src="https://img.shields.io/badge/CCDS-Project%20template-328F97?logo=cookiecutter" />
 </a>
 
+<div style="display: flex;">
+
+  <a href="https://www.youtube.com/playlist?list=PL3iMuuZjTaTJu01noBWHrLnX1ayRrzTiu" target="_blank" style="display: inline-block; margin-right: 8px;">
+    <img src="https://img.shields.io/badge/YouTube-red?style=for-the-badge&logo=youtube&logoColor=white" alt="YouTube Badge"/>
+  </a>
+
+  <a href="https://www.linkedin.com/in/moreira-and/" target="_blank" style="display: inline-block; margin-right: 8px;">
+    <img src="https://img.shields.io/badge/LinkedIn--blue?style=for-the-badge&logo=linkedin&logoColor=white" alt="LinkedIn Badge"/>
+  </a>
+
+  <a href="https://github1s.com/moreira-and/omni-ml/" target="_blank" style="display: inline-block;">
+    <img src="https://img.shields.io/badge/VS_Code-007ACC?style=for-the-badge&logo=visual-studio-code&logoColor=white" alt="Visual Studio Code Badge"/>
+  </a>
+</div>
+
 Data Science Template from cookiecutter
+
+```mermaid
+flowchart LR
+    A["«interface»<br><b>dataset</b>"] --> B["«interface»<br><b>feature</b>"]
+    B --> C["«interface»<br><b>preprocess</b>"]
+    C --> D["«interface»<br><b>train</b>"]
+    D --> E["«interface»<br><b>evaluate</b>"]
+    E --> F["«interface»<br><b>infer</b>"]
+    F --> G["«interface»<br><b>explain</b>"]
+
+    %% Estilos (cores baseadas no diagrama original)
+    style A fill:#dae8fc,stroke:#6c8ebf,stroke-width:2px
+    style B fill:#dae8fc,stroke:#6c8ebf,stroke-width:2px
+    style C fill:#dae8fc,stroke:#6c8ebf,stroke-width:2px
+    style D fill:#d5e8d4,stroke:#82b366,stroke-width:2px
+    style E fill:#d5e8d4,stroke:#82b366,stroke-width:2px
+    style F fill:#dae8fc,stroke:#6c8ebf,stroke-width:2px
+    style G fill:#d5e8d4,stroke:#82b366,stroke-width:2px
+```
+
+
+## Install
+
+```bash
+
+poetry config virtualenvs.in-project true --local
+poetry install
+
+```
 
 ## Project Organization
 
