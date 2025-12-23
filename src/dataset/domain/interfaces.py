@@ -2,8 +2,9 @@ from abc import ABC, abstractmethod
 from datetime import datetime
 from typing import Iterable
 
-from .entities import Asset, Candle
+from .entities import Asset
 from .enums import CandleInterval
+from .value_objects import Candle
 
 
 class AssetRepository(ABC):

@@ -5,9 +5,9 @@ import pandas as pd
 import yfinance as yf
 
 from ....config import logger
-from ...domain.entities import Candle
 from ...domain.enums import CandleInterval
 from ...domain.interfaces import CandleRepository
+from ...domain.value_objects import Candle
 
 
 class CandleByYfinance(CandleRepository):

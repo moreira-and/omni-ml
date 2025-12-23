@@ -1,14 +1,12 @@
 import csv
 from datetime import datetime
-from pathlib import Path
 from typing import Iterable
-
-import yfinance as yf
 
 from ....config import RAW_DATA_DIR, logger
 from ...domain.entities import Asset
 from ...domain.enums import CandleInterval
-from ...domain.interfaces import AssetRepository, Candle
+from ...domain.interfaces import AssetRepository
+from ...domain.value_objects import Candle
 
 
 class LocalFileAssetRepository(AssetRepository):
