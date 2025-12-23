@@ -12,7 +12,7 @@ PROJ_ROOT = Path(__file__).resolve().parents[1]
 logger.info(f"PROJ_ROOT path is: {PROJ_ROOT}")
 
 # MLflow configuration
-MLFLOW_TRACKING_URI = PROJ_ROOT / "mlruns"
+MLFLOW_TRACKING_URI = "http://127.0.0.1:5000"  # PROJ_ROOT / "mlruns"  # Local file-based tracking
 mlflow.set_tracking_uri(MLFLOW_TRACKING_URI)
 
 DATA_DIR = PROJ_ROOT / "data"

@@ -76,5 +76,6 @@ def main(
         mlflow.log_metric("data_loading_time_seconds", elapsed_time)
         mlflow.log_artifact(str(config_path), artifact_path="configs")
 
+
 if __name__ == "__main__":
     app()
