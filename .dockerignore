@@ -1,0 +1,76 @@
+# -------------------------
+# Python artifacts
+# -------------------------
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# -------------------------
+# Virtual environments
+# -------------------------
+.venv/
+venv/
+env/
+
+# -------------------------
+# Poetry / Pip
+# -------------------------
+.poetry/
+pip-wheel-metadata/
+pip-log.txt
+
+# -------------------------
+# Test / coverage / lint
+# -------------------------
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+.tox/
+
+# -------------------------
+# Jupyter / notebooks
+# -------------------------
+.ipynb_checkpoints/
+
+# -------------------------
+# IDE / editor
+# -------------------------
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# -------------------------
+# Git / CI
+# -------------------------
+.git/
+.gitignore
+.github/
+
+# -------------------------
+# OS junk
+# -------------------------
+.DS_Store
+Thumbs.db
+
+# -------------------------
+# Logs & runtime files
+# -------------------------
+logs/
+*.log
+
+# -------------------------
+# Docker infra (opcional)
+# -------------------------
+docker-compose.yml
+docker-compose.*.yml
+
+# -------------------------
+# Env / secrets
+# -------------------------
+.env
+.env.*

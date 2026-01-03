@@ -1,0 +1,11 @@
+ARG MLFLOW_VERSION=latest
+
+FROM ghcr.io/mlflow/mlflow:${MLFLOW_VERSION}
+
+# Add minimal tooling for health checks and runtime dependencies that are not baked into the upstream image.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends netcat-openbsd curl ca-certificates \
+    && pip install --no-cache-dir psycopg2-binary boto3 \
+    && rm -rf /var/lib/apt/lists/*
+
+EXPOSE 5000
