@@ -10,7 +10,7 @@ from ..domain.interfaces import ModelRouteRepository
 
 import pandas as pd
 
-class LocalModelRouteRepository(ModelRouteRepository):
+class LocalRouteRepository(ModelRouteRepository):
 
     @property
     def path(self) -> Path:
@@ -55,6 +55,17 @@ class LocalModelRouteRepository(ModelRouteRepository):
         df = pd.read_csv(self.path)
         rows = df[df["source"] == source.value]
         for _, row in rows.iterrows():
+            yield ModelRoute(
+                id=RouteId(row["id"]),
+                code=ModelCode(row["code"]),
+                name=ModelName(row["name"]),
+                source=ModelSource(row["source"]),
+                type=ModelType(row["type"].lower()),
+            )
+
+    def all(self) -> Iterable[ModelRoute]:
+        df = pd.read_csv(self.path)
+        for _, row in df.iterrows():
             yield ModelRoute(
                 id=RouteId(row["id"]),
                 code=ModelCode(row["code"]),

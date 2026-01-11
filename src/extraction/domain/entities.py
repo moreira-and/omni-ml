@@ -1,10 +1,7 @@
-from datetime import datetime
-
 from .value_objects import RouteId, ModelCode, ModelName, ModelSource
 
 from .enums import ModelType
 from .events import ModelRouted
-from .errors import DomainError
 
 class ModelRoute:
     def __init__(

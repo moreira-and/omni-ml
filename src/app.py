@@ -42,6 +42,11 @@ def train():
     return {"accuracy": float(accuracy)}
 
 
+@app.get("/extract")
+def extract():
+    return {"message": "Data extraction endpoint"}
+
+
 @app.get("/")
 def home():
     return "Hello, this is the MLflow model training API!"

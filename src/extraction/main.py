@@ -1,19 +1,17 @@
-import datetime
+from  datetime import datetime, timezone, timedelta
 import time
 from typing import Any, Mapping
 
 from loguru import logger
 import typer
 
-from src.extraction.domain.value_objects import ModelSource
-
 from src.extraction.application.usecases import BatchExtractService
 from src.extraction.application.interfaces import ExtractorRouter
 
 from src.extraction.infrastructure.routing import DefaultExtractionRouter
-from src.extraction.infrastructure.repositories import LocalModelRouteRepository
+from src.extraction.infrastructure.repositories import LocalRouteRepository
 from src.extraction.infrastructure.extractors.yfinance import YFinanceCandlesSeries
-from src.extraction.infrastructure.storages import LocalExtractionResultStorage
+from src.extraction.infrastructure.storages import LocalResultStorage
 
 app = typer.Typer()
 
@@ -37,18 +35,19 @@ def build_repository():
 
     Registers and returns data repositories.
     """
-    return LocalModelRouteRepository()
+    return LocalRouteRepository()
 
 def build_storage():
     """
     Composition root for result storage.
     Registers and returns result storage implementations.
     """
-    return LocalExtractionResultStorage()
+    return LocalResultStorage()
 
 @app.command()
 def main(
-    route_id: str | None = None,
+    days: int = typer.Option(30, help="Number of days to look back for data extraction."),
+    time_window: str = typer.Option("1d", help="Time window for data extraction.")
 ):
     """
     CLI entry point for batch data extraction.
@@ -61,33 +60,35 @@ def main(
     logger.info("Starting raw data loading...")
 
     try:
-        #if not route_id:
-        #    raise ValueError("route_id must be provided")
-
-        #logger.info(f"Processing route ID: {route_id}")
-
         # --- Route resolution (placeholder) -----------------
         repository = build_repository()
         router = build_router()
         storage = build_storage()
 
+        # --- services ----------------------
         service = BatchExtractService(router)
 
         # --- Technical extraction parameters ----------------
+        # DEBITE: These should be part of a configuration object BY TYPE
         params: Mapping[str, Any] = {
-            "start": datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=30),
-            "end": datetime.datetime.now(datetime.timezone.utc),
-            "time_window": "1d",
+            "start": datetime.now(timezone.utc) - timedelta(days=days),
+            "end": datetime.now(timezone.utc),
+            "time_window": time_window,
         }
 
-        for route in repository.by_source(ModelSource("yfinance")):
-            results = service.extract_batch([route], params)
-            logger.success(
-                f"Extraction completed for {len(results)} route(s)"
-            )
+        for route in repository.all():
+            batch = service.extract_batch(route, params)
+            if not batch.results:
+                logger.warning(f"No results for route ({route.type.value}, {route.source.value}, {route.name.value})")
+                continue
+            else:
+                logger.success(
+                    f"Extraction completed for route ({route.type.value}, {route.source.value}, {route.name.value}) "
+                )
 
-            storage.store(results)
-        
+                storage.store(batch)
+
+        logger.success("Raw data loading completed successfully.")        
 
     except Exception as e:
         logger.exception("Raw data loading failed")

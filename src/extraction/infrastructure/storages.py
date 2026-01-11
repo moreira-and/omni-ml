@@ -1,47 +1,80 @@
-from collections.abc import Mapping
 from pathlib import Path
-import datetime
-import pickle
-from typing import Any
+from typing import Any, Mapping
+import csv
+from enum import Enum
 
 from ...config import DATA_DIR
 from ..domain.entities import ModelRoute
+from ..domain.models import ExtractionBatch
 
-class LocalExtractionResultStorage:
-    def __init__(self, base_path: Path | None = None) -> None:
-        self._base_path = base_path or DATA_DIR / "extraction_results"
+
+from dataclasses import is_dataclass, asdict
+
+
+def to_row(item: Any) -> Mapping[str, Any]:
+    if isinstance(item, Mapping):
+        return {
+            k: v.value if isinstance(v, Enum) else v
+            for k, v in item.items()
+        }
+
+    if is_dataclass(item):
+        return {
+            k: (v.value if isinstance(v, Enum) else v)
+            for k, v in asdict(item).items()
+        }
+
+    if hasattr(item, "__dict__"):
+        return {
+            k: (v.value if isinstance(v, Enum) else v)
+            for k, v in vars(item).items()
+        }
+
+    raise TypeError(
+        f"Cannot serialize item of type {type(item).__name__} to CSV row"
+    )
+
+
+class LocalResultStorage:
+    def __init__(
+        self,
+        base_path: Path | None = None,
+    ) -> None:
+        self._base_path = base_path or (DATA_DIR / "extraction_results")
         self._base_path.mkdir(parents=True, exist_ok=True)
 
-    def store(self, results: Mapping[ModelRoute, Any]) -> None:
-        timestamp = self._now_timestamp()
+    def store(self, batch: ExtractionBatch) -> None:
+        timestamp = batch.executed_at.strftime("%Y%m%d_%H%M%S")
 
-        for route, stream in results.items():
-            materialized_result = self._materialize(stream)
-            self._store_payload(
-                route_id=route.id.value,
-                payload=materialized_result,
+        for route, stream in batch.results.items():
+            rows = [to_row(item) for item in stream]
+            if not rows:
+                continue
+
+            self._store_csv(
+                route=route,
+                rows=rows,
                 timestamp=timestamp,
             )
 
-    def _materialize(self, stream: Any) -> list[Any]:
-        return list(stream)
+    def _store_csv(
+        self,
+        *,
+        route: ModelRoute,
+        rows: list[Mapping[str, Any]],
+        timestamp: str,
+    ) -> None:
+        route_dir = self._route_directory(route.id.value)
+        file_path = route_dir / f"{timestamp}.csv"
 
-    def _store_payload(self, *, route_id: str, payload: Any, timestamp: str) -> None:
-        route_dir = self._route_directory(route_id)
-        file_path = route_dir / f"{timestamp}.pkl"
-        self._serialize(file_path, payload)
+        fieldnames = rows[0].keys()
+
+        with file_path.open("w", newline="", encoding="utf-8") as file:
+            writer = csv.DictWriter(file, fieldnames=fieldnames)
+            writer.writeheader()
+            writer.writerows(rows)
 
     def _route_directory(self, route_id: str) -> Path:
         path = self._base_path / route_id
         path.mkdir(parents=True, exist_ok=True)
         return path
-
-    def _serialize(self, file_path: Path, payload: Any) -> None:
-        with file_path.open("wb") as file:
-            pickle.dump(payload, file)
-
-    @staticmethod
-    def _now_timestamp() -> str:
-        return datetime.datetime.now(
-            datetime.timezone.utc
-        ).strftime("%Y%m%d_%H%M%S")

@@ -1,0 +1,6 @@
+candles:
+  lookback_days: 3600
+  time_window: ONE_DAY
+
+indicators:
+  lookback_days: 3650
