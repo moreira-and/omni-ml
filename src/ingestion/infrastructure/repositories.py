@@ -2,7 +2,7 @@ from typing import Iterable
 
 from ...config import DATA_DIR, Path
 
-from ..domain.entities import ModelRoute
+from ..domain.entities import ModelRouteDefinition
 from ..domain.enums import ModelType
 from ..domain.value_objects import ModelCode, ModelName, RouteId, ModelSource
 
@@ -14,13 +14,13 @@ class LocalRouteRepository(ModelRouteRepository):
 
     @property
     def path(self) -> Path:
-        return DATA_DIR / "model_routes.csv"
+        return DATA_DIR / "model_route_definition.csv"
 
-    def by_id(self, id: RouteId) -> ModelRoute:
+    def by_id(self, id: RouteId) -> ModelRouteDefinition:
         df = pd.read_csv(self.path)
         row = df[df["id"] == id.value]
         if not row.empty:
-            return ModelRoute(
+            return ModelRouteDefinition(
                 id=RouteId(row["id"].iloc[0]),
                 code=ModelCode(row["code"].iloc[0]),
                 name=ModelName(row["name"].iloc[0]),
@@ -30,7 +30,7 @@ class LocalRouteRepository(ModelRouteRepository):
         raise ValueError(f"Route with id {id} not found")
     
 
-    def by_code(self, code: ModelCode) -> Iterable[ModelRoute]:
+    def by_code(self, code: ModelCode) -> Iterable[ModelRouteDefinition]:
         """
         Retorna todas as policies associadas a um código.
         A decisão de prioridade/fallback é do domínio.
@@ -38,7 +38,7 @@ class LocalRouteRepository(ModelRouteRepository):
         df = pd.read_csv(self.path)
         rows = df[df["code"] == code.value]
         for _, row in rows.iterrows():
-            yield ModelRoute(
+            yield ModelRouteDefinition(
                 id=RouteId(row["id"]),
                 code=ModelCode(row["code"]),
                 name=ModelName(row["name"]),
@@ -47,7 +47,7 @@ class LocalRouteRepository(ModelRouteRepository):
             )
 
 
-    def by_source(self, source: ModelSource) -> Iterable[ModelRoute]:
+    def by_source(self, source: ModelSource) -> Iterable[ModelRouteDefinition]:
         """
         Retorna todas as policies associadas a uma origem.
         A decisão de prioridade/fallback é do domínio.
@@ -55,7 +55,7 @@ class LocalRouteRepository(ModelRouteRepository):
         df = pd.read_csv(self.path)
         rows = df[df["source"] == source.value]
         for _, row in rows.iterrows():
-            yield ModelRoute(
+            yield ModelRouteDefinition(
                 id=RouteId(row["id"]),
                 code=ModelCode(row["code"]),
                 name=ModelName(row["name"]),
@@ -63,10 +63,10 @@ class LocalRouteRepository(ModelRouteRepository):
                 type=ModelType(row["type"].lower()),
             )
 
-    def all(self) -> Iterable[ModelRoute]:
+    def all(self) -> Iterable[ModelRouteDefinition]:
         df = pd.read_csv(self.path)
         for _, row in df.iterrows():
-            yield ModelRoute(
+            yield ModelRouteDefinition(
                 id=RouteId(row["id"]),
                 code=ModelCode(row["code"]),
                 name=ModelName(row["name"]),
@@ -74,7 +74,7 @@ class LocalRouteRepository(ModelRouteRepository):
                 type=ModelType(row["type"].lower()),
             )
 
-    def save(self, route: ModelRoute) -> None:
+    def save(self, route: ModelRouteDefinition) -> None:
         df = pd.read_csv(self.path)
         if not df[df["id"] == route._id.value].empty:
             df.loc[df["id"] == route._id.value, ["code", "name", "source", "type"]] = [

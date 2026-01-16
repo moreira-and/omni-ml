@@ -1,7 +1,7 @@
 from typing import Any, Iterable, Mapping
 from abc import ABC, abstractmethod
 
-from ..domain.entities import ModelRoute
+from ..domain.entities import ModelRouteDefinition
 from ..domain.value_objects import ModelSource
 from ..domain.enums import ModelType
 
@@ -10,7 +10,7 @@ from ..domain.enums import ModelType
 class ModelExtractor(ABC):
 
     @abstractmethod
-    def extract(self, route: ModelRoute, params: Mapping[str, Any] | None = None) -> Iterable[Any]:
+    def extract(self, route: ModelRouteDefinition, params: Mapping[str, Any] | None = None) -> Iterable[Any]:
         ...
 
     @property
@@ -26,11 +26,11 @@ class ModelExtractor(ABC):
 ## 1. Define ExtractorRouter interface
 class ExtractorRouter(ABC):
     @abstractmethod
-    def get_extractor(self, route: ModelRoute) -> ModelExtractor:
+    def get_extractor(self, route: ModelRouteDefinition) -> ModelExtractor:
         ...
 
 
 class ExtractionResultStorage(ABC):
     @abstractmethod
-    def store(self, results: Mapping[ModelRoute, Any]) -> None:
+    def store(self, results: Mapping[ModelRouteDefinition, Any]) -> None:
         ...

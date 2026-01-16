@@ -1,6 +1,6 @@
 # Data
-/data/
-
+/data/**
+!/data/model_route_definition.csv
 # Mac OS-specific storage files
 .DS_Store
 

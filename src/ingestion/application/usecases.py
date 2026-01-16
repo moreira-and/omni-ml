@@ -1,7 +1,7 @@
 from typing import Any, Mapping
 from datetime import datetime, timezone
 
-from ..domain.entities import ModelRoute
+from ..domain.entities import ModelRouteDefinition
 from ..domain.models import ExtractionBatch
 from .interfaces import ExtractorRouter
 
@@ -33,7 +33,7 @@ class BatchExtractService:
 
     def extract_batch(
         self,
-        route: ModelRoute,
+        route: ModelRouteDefinition,
         params: Mapping[str, Any] | None = None,
     ) -> ExtractionBatch:
 
@@ -68,7 +68,7 @@ class ExtractionService:
         self._clock = clock
         self._router = router
 
-    def extract_batch(self, route: ModelRoute) -> ExtractionBatch:
+    def extract_batch(self, route: ModelRouteDefinition) -> ExtractionBatch:
         params = self._build_params(route.type.value)
 
         extractor = self._router.get_extractor(route)

@@ -6,7 +6,7 @@ from ....config import logger
 from ...domain.enums import ModelType, TimeWindow
 from ...domain.models import CandleStick
 from ...domain.value_objects import ModelSource
-from ...domain.entities import ModelRoute
+from ...domain.entities import ModelRouteDefinition
 
 from ..interfaces import CandlesExtractor
 
@@ -16,7 +16,7 @@ import pandas as pd
 
 class YFinanceCandlesSeries(CandlesExtractor):
 
-    def extract(self, route: ModelRoute, params: Mapping[str, Any] | None = None):
+    def extract(self, route: ModelRouteDefinition, params: Mapping[str, Any] | None = None):
         if not params:
             raise ValueError("CandlesExtractor requires criterious")
 
@@ -29,7 +29,7 @@ class YFinanceCandlesSeries(CandlesExtractor):
     
     def extract_between(
             self,
-            route: ModelRoute,
+            route: ModelRouteDefinition,
             start:datetime,
             end:datetime,
             time_window: TimeWindow
@@ -52,7 +52,7 @@ class YFinanceCandlesSeries(CandlesExtractor):
             for candle in df_candles.itertuples():
                 yield self._convert_to_candlestick(route, time_window, candle)
 
-    def _convert_to_candlestick(self, route: ModelRoute, time_window: TimeWindow, candle) -> CandleStick:
+    def _convert_to_candlestick(self, route: ModelRouteDefinition, time_window: TimeWindow, candle) -> CandleStick:
         # Convert a single data point from yfinance to a Candle entity
         candle = CandleStick(
             code=route.code.value,

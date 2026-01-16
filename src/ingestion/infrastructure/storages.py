@@ -4,7 +4,7 @@ import csv
 from enum import Enum
 
 from ...config import DATA_DIR
-from ..domain.entities import ModelRoute
+from ..domain.entities import ModelRouteDefinition
 from ..domain.models import ExtractionBatch
 
 
@@ -60,7 +60,7 @@ class LocalResultStorage:
     def _store_csv(
         self,
         *,
-        route: ModelRoute,
+        route: ModelRouteDefinition,
         rows: list[Mapping[str, Any]],
         timestamp: str,
     ) -> None:

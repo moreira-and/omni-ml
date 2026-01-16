@@ -2,7 +2,7 @@ from typing import List
 
 
 
-from ..domain.entities import ModelRoute
+from ..domain.entities import ModelRouteDefinition
 from ..application.interfaces import ModelExtractor, ExtractorRouter
 from .extractors.yfinance import YFinanceCandlesSeries
 from .extractors.bcb import BcbLoadingStrategy
@@ -15,7 +15,7 @@ class DefaultExtractionRouter(ExtractorRouter):
             BcbLoadingStrategy()
         ]
 
-    def get_extractor(self, route: ModelRoute) -> ModelExtractor:
+    def get_extractor(self, route: ModelRouteDefinition) -> ModelExtractor:
         for extractor in self._extractors:
             if (
                 extractor.type == route.type

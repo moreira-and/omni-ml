@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Any, Mapping
 
-from .entities import ModelRoute
+from .entities import ModelRouteDefinition
 from .enums import TimeWindow
 
 @dataclass(frozen=True)
@@ -33,7 +33,7 @@ class Indicator:
 @dataclass(frozen=True)
 class ExtractionBatch:
     executed_at: datetime
-    results: Mapping[ModelRoute, Any]
+    results: Mapping[ModelRouteDefinition, Any]
 
     def is_empty(self) -> bool:
         return not bool(self.results)

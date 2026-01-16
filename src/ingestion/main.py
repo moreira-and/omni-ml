@@ -5,16 +5,16 @@ from typing import Any, Mapping
 from loguru import logger
 import typer
 
-from src.extraction.application.usecases import BatchExtractService
-from src.extraction.application.interfaces import ExtractorRouter
+from src.ingestion.application.usecases import BatchExtractService
+from src.ingestion.application.interfaces import ExtractorRouter
 
-from src.extraction.infrastructure.routing import DefaultExtractionRouter
-from src.extraction.infrastructure.repositories import LocalRouteRepository
-from src.extraction.infrastructure.storages import LocalResultStorage
+from src.ingestion.infrastructure.routing import DefaultExtractionRouter
+from src.ingestion.infrastructure.repositories import LocalRouteRepository
+from src.ingestion.infrastructure.storages import LocalResultStorage
 
 
-from src.extraction.infrastructure.extractors.yfinance import YFinanceCandlesSeries
-from src.extraction.infrastructure.extractors.bcb import BcbLoadingStrategy
+from src.ingestion.infrastructure.extractors.yfinance import YFinanceCandlesSeries
+from src.ingestion.infrastructure.extractors.bcb import BcbLoadingStrategy
 
 app = typer.Typer()
 

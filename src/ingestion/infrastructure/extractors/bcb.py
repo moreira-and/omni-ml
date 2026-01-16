@@ -6,7 +6,7 @@ from ....config import logger
 from ...domain.enums import ModelType, TimeWindow
 from ...domain.models import Indicator
 from ...domain.value_objects import ModelSource
-from ...domain.entities import ModelRoute
+from ...domain.entities import ModelRouteDefinition
 
 from ..interfaces import IndicatorExtractor
 
@@ -16,7 +16,7 @@ import pandas as pd
 
 class BcbLoadingStrategy(IndicatorExtractor):
 
-    def extract(self, route: ModelRoute, params: Mapping[str, Any] | None = None):
+    def extract(self, route: ModelRouteDefinition, params: Mapping[str, Any] | None = None):
         if not params:
             raise ValueError("IndicatorExtractor requires criterious")
 
@@ -29,7 +29,7 @@ class BcbLoadingStrategy(IndicatorExtractor):
     
     def extract_between(
             self,
-            route: ModelRoute,
+            route: ModelRouteDefinition,
             start:datetime,
             end:datetime,
             time_window: TimeWindow
@@ -70,7 +70,7 @@ class BcbLoadingStrategy(IndicatorExtractor):
         self,
         *,
         json_series: Optional[Dict],
-        route: ModelRoute,
+        route: ModelRouteDefinition,
         time_window: TimeWindow
     ) -> Iterable[Indicator]:
 

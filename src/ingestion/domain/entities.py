@@ -3,7 +3,7 @@ from .value_objects import RouteId, ModelCode, ModelName, ModelSource
 from .enums import ModelType
 from .events import ModelRouted
 
-class ModelRoute:
+class ModelRouteDefinition:
     def __init__(
         self,
         id: RouteId,
