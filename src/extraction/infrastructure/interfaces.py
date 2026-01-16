@@ -5,7 +5,7 @@ from datetime import datetime
 
 from ..domain.entities import ModelRoute
 from ..domain.enums import TimeWindow
-from ..domain.models import CandleStick
+from ..domain.models import CandleStick, Indicator
 
 from ..application.interfaces import ModelExtractor
 
@@ -17,3 +17,9 @@ class CandlesExtractor(ModelExtractor, ABC):
     def extract_between(self, route: ModelRoute, start:datetime, end:datetime, time_window: TimeWindow) -> Iterable[CandleStick]:
         ...
 
+
+class IndicatorExtractor(ModelExtractor, ABC):
+
+    @abstractmethod
+    def extract_between(self, route: ModelRoute, start:datetime, end:datetime, time_window: TimeWindow) -> Iterable[Indicator]:
+        ...

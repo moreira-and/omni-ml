@@ -10,8 +10,11 @@ from src.extraction.application.interfaces import ExtractorRouter
 
 from src.extraction.infrastructure.routing import DefaultExtractionRouter
 from src.extraction.infrastructure.repositories import LocalRouteRepository
-from src.extraction.infrastructure.extractors.yfinance import YFinanceCandlesSeries
 from src.extraction.infrastructure.storages import LocalResultStorage
+
+
+from src.extraction.infrastructure.extractors.yfinance import YFinanceCandlesSeries
+from src.extraction.infrastructure.extractors.bcb import BcbLoadingStrategy
 
 app = typer.Typer()
 
@@ -26,6 +29,7 @@ def build_router() -> ExtractorRouter:
     return DefaultExtractionRouter(
         extractors=[
             YFinanceCandlesSeries(),
+            BcbLoadingStrategy()
         ]
     )
 

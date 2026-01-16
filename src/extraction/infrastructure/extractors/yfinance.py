@@ -5,7 +5,7 @@ from ....config import logger
 
 from ...domain.enums import ModelType, TimeWindow
 from ...domain.models import CandleStick
-from ...domain.value_objects import ModelName, ModelSource, ModelCode
+from ...domain.value_objects import ModelSource
 from ...domain.entities import ModelRoute
 
 from ..interfaces import CandlesExtractor
