@@ -2,9 +2,7 @@ from typing import Any, Iterable, Mapping
 from abc import ABC, abstractmethod
 
 from ..domain.entities import ModelRouteDefinition
-from ..domain.value_objects import ModelSource
-from ..domain.enums import ModelType
-
+from ..domain.enums import ModelSource, ModelType
 
 ## 2. Define ModelExtractor interface
 class ModelExtractor(ABC):

@@ -64,7 +64,7 @@ class LocalResultStorage:
         rows: list[Mapping[str, Any]],
         timestamp: str,
     ) -> None:
-        route_dir = self._route_directory(route.id.value)
+        route_dir = self._route_directory(route)
         file_path = route_dir / f"{timestamp}.csv"
 
         fieldnames = rows[0].keys()
@@ -74,7 +74,7 @@ class LocalResultStorage:
             writer.writeheader()
             writer.writerows(rows)
 
-    def _route_directory(self, route_id: str) -> Path:
-        path = self._base_path / route_id
+    def _route_directory(self, route: ModelRouteDefinition) -> Path:
+        path = self._base_path / route.source.value / route.type.value / route.name.value / route.time_window.value
         path.mkdir(parents=True, exist_ok=True)
         return path

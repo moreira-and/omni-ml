@@ -1,34 +1,19 @@
 import uuid
-import datetime
+from datetime import datetime, timezone
 
-from .errors import DomainError
+from .errors import DomainError    
 
-class RouteId:
-    def __init__(self,
-                 value: str | None = None,
-                 created_at: datetime.datetime | None = None
-                 ):
-        self._value = value or uuid.uuid4().hex
-        self._created_at = created_at or datetime.datetime.now(datetime.timezone.utc)
 
-    @property
-    def value(self) -> str:
-        return self._value
-
-    @property
-    def created_at(self) -> datetime.datetime:
-        return self._created_at
-
-    def __eq__(self, other):
-        return (
-            isinstance(other, RouteId) 
-            and self._value == other._value
-            and self._created_at == other._created_at
-            )
-
-    def __hash__(self):
-        return hash((self._value, self._created_at))
-    
+class ModelRastreability:
+    def __init__(
+        self,
+        id: str | None = None,
+        created_at: datetime | None = None,
+        modified_at: datetime | None = None,
+    ):
+        self.id = id or uuid.uuid4()
+        self.created_at = created_at or datetime.now(timezone.utc)
+        self.modified_at = modified_at or self.created_at
 
 class ModelCode:
     def __init__(self, value: str):
@@ -67,43 +52,6 @@ class ModelName:
             isinstance(other, ModelName)
             and self._value == other._value
         )
-
-    def __hash__(self):
-        return hash(self._value)
-
-
-class ModelSource:
-    def __init__(self, value: str):
-        if not value:
-            raise DomainError("TriggerSource cannot be empty")
-
-        self._value = value.lower()
-
-    @property
-    def value(self) -> str:
-        return self._value
-
-    def __eq__(self, other):
-        return isinstance(other, ModelSource) and self._value == other._value
-
-    def __hash__(self):
-        return hash(self._value)
-
-
-
-class Priority:
-    def __init__(self, value: int):
-        if value < 0:
-            raise DomainError("Priority must be >= 0")
-
-        self._value = value
-
-    @property
-    def value(self) -> int:
-        return self._value
-
-    def __eq__(self, other):
-        return isinstance(other, Priority) and self._value == other._value
 
     def __hash__(self):
         return hash(self._value)

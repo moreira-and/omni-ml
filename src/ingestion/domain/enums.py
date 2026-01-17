@@ -1,5 +1,12 @@
 from enum import Enum
 
+class ModelType(Enum):
+    CANDLESTICK = "candlestick"
+    ECONOMIC_INDICATOR = "economic_indicator"
+
+class ModelSource(Enum):
+    YFINANCE = "yfinance"
+    BCB = "bcb"
 
 ## TimeWindow Enum represents various time intervals for candlestick data in trading.
 class TimeWindow(Enum):
@@ -11,7 +18,6 @@ class TimeWindow(Enum):
     ONE_DAY = "1d"
     ONE_WEEK = "1w"
     ONE_MONTH = "1M"
-
-class ModelType(Enum):
-    CANDLESTICK = "candlestick"
-    ECONOMIC_INDICATOR = "economic_indicator"
+    ONE_QUARTER = "3M"
+    ONE_SEMESTER = "6M"
+    ONE_YEAR = "1y"

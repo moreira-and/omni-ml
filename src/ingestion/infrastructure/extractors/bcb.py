@@ -1,17 +1,16 @@
-from typing import Dict, Iterable, List, Optional, Mapping, Any
+from typing import Dict, Iterable, Optional, Mapping, Any
 from datetime import datetime
 
 from ....config import logger
 
 from ...domain.enums import ModelType, TimeWindow
 from ...domain.models import Indicator
-from ...domain.value_objects import ModelSource
+from ...domain.enums import ModelSource
 from ...domain.entities import ModelRouteDefinition
 
 from ..interfaces import IndicatorExtractor
 
 import requests
-import pandas as pd
 
 
 class BcbLoadingStrategy(IndicatorExtractor):
@@ -24,7 +23,6 @@ class BcbLoadingStrategy(IndicatorExtractor):
             route=route,
             start=params["start"],
             end=params["end"],
-            time_window=TimeWindow(params["time_window"]),
         )
     
     def extract_between(
@@ -32,7 +30,6 @@ class BcbLoadingStrategy(IndicatorExtractor):
             route: ModelRouteDefinition,
             start:datetime,
             end:datetime,
-            time_window: TimeWindow
         ) -> Iterable[Indicator]:
     
 
@@ -44,7 +41,7 @@ class BcbLoadingStrategy(IndicatorExtractor):
             end_date=end
         )
         
-        indicators = self._parse_indicators(json_series=json_series, route=route, time_window=time_window)
+        indicators = self._parse_indicators(json_series=json_series, route=route)
         return indicators
 
     def _request_json_series(self, sgs_code: str, start_date: datetime, end_date: datetime) -> Optional[Dict]:
@@ -71,7 +68,6 @@ class BcbLoadingStrategy(IndicatorExtractor):
         *,
         json_series: Optional[Dict],
         route: ModelRouteDefinition,
-        time_window: TimeWindow
     ) -> Iterable[Indicator]:
 
         for item in json_series if json_series else []:
@@ -81,14 +77,14 @@ class BcbLoadingStrategy(IndicatorExtractor):
                     name=route.name.value,
                     timestamp=datetime.strptime(item["data"], "%d/%m/%Y"),
                     value=float(item["valor"]),
-                    time_window=time_window,
+                    time_window=route.time_window,
                 )
 
             except (KeyError, ValueError) as exc:
                 logger.warning(
                     "Invalid BCB indicator data for route %s: %s",
                     exc,
-                    route.id.value,
+                    route.rastreability.id,
                     item,
                     exc_info=True,
                 )

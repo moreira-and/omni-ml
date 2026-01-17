@@ -1,11 +1,13 @@
 from dataclasses import dataclass
 import datetime
 
-from .value_objects import ModelCode, ModelName, ModelSource, RouteId
+from .enums import ModelSource
+from .value_objects import ModelCode, ModelName, ModelRastreability
+
 
 @dataclass(frozen=True)
 class ModelRouted:
-    route_id: RouteId
+    rastreability: ModelRastreability
     code: ModelCode
     name: ModelName
     source: ModelSource

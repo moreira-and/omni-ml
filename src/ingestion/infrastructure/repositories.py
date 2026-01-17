@@ -3,8 +3,8 @@ from typing import Iterable
 from ...config import DATA_DIR, Path
 
 from ..domain.entities import ModelRouteDefinition
-from ..domain.enums import ModelType
-from ..domain.value_objects import ModelCode, ModelName, RouteId, ModelSource
+from ..domain.enums import ModelType, ModelSource, TimeWindow
+from ..domain.value_objects import ModelCode, ModelName
 
 from ..domain.interfaces import ModelRouteRepository
 
@@ -14,21 +14,7 @@ class LocalRouteRepository(ModelRouteRepository):
 
     @property
     def path(self) -> Path:
-        return DATA_DIR / "model_route_definition.csv"
-
-    def by_id(self, id: RouteId) -> ModelRouteDefinition:
-        df = pd.read_csv(self.path)
-        row = df[df["id"] == id.value]
-        if not row.empty:
-            return ModelRouteDefinition(
-                id=RouteId(row["id"].iloc[0]),
-                code=ModelCode(row["code"].iloc[0]),
-                name=ModelName(row["name"].iloc[0]),
-                source=ModelSource(row["source"].iloc[0]),
-                type=ModelType(row["type"].iloc[0].lower()),
-            )
-        raise ValueError(f"Route with id {id} not found")
-    
+        return DATA_DIR / "model_route_definition.csv"    
 
     def by_code(self, code: ModelCode) -> Iterable[ModelRouteDefinition]:
         """
@@ -39,11 +25,11 @@ class LocalRouteRepository(ModelRouteRepository):
         rows = df[df["code"] == code.value]
         for _, row in rows.iterrows():
             yield ModelRouteDefinition(
-                id=RouteId(row["id"]),
                 code=ModelCode(row["code"]),
                 name=ModelName(row["name"]),
                 source=ModelSource(row["source"]),
-                type=ModelType(row["type"].lower()),
+                type=ModelType(row["type"]),
+                time_window=TimeWindow(row["time_window"]),
             )
 
 
@@ -56,40 +42,30 @@ class LocalRouteRepository(ModelRouteRepository):
         rows = df[df["source"] == source.value]
         for _, row in rows.iterrows():
             yield ModelRouteDefinition(
-                id=RouteId(row["id"]),
                 code=ModelCode(row["code"]),
                 name=ModelName(row["name"]),
                 source=ModelSource(row["source"]),
-                type=ModelType(row["type"].lower()),
+                type=ModelType(row["type"]),
+                time_window=TimeWindow(row["time_window"]),
             )
-
     def all(self) -> Iterable[ModelRouteDefinition]:
         df = pd.read_csv(self.path)
         for _, row in df.iterrows():
             yield ModelRouteDefinition(
-                id=RouteId(row["id"]),
                 code=ModelCode(row["code"]),
                 name=ModelName(row["name"]),
                 source=ModelSource(row["source"]),
-                type=ModelType(row["type"].lower()),
+                type=ModelType(row["type"]),
+                time_window=TimeWindow(row["time_window"]),
             )
 
     def save(self, route: ModelRouteDefinition) -> None:
         df = pd.read_csv(self.path)
-        if not df[df["id"] == route._id.value].empty:
-            df.loc[df["id"] == route._id.value, ["code", "name", "source", "type"]] = [
-                route.code.value,
-                route.name.value,
-                route.source.value,
-                route.type.value,
-            ]
-        else:
-            new_row = {
-                "id": route._id.value,
-                "code": route.code.value,
-                "name": route.name.value,
-                "source": route.source.value,
-                "type": route.type.value,
-            }
-            df = pd.concat([df, pd.DataFrame([new_row])], ignore_index=True)
+        df.loc["code", "name", "source", "type", "time_window"] = [
+            route.code.value,
+            route.name.value,
+            route.source.value,
+            route.type.value,
+            route.time_window.value,
+        ]
         df.to_csv(self.path, index=False)

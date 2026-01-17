@@ -1,26 +1,39 @@
-from .value_objects import RouteId, ModelCode, ModelName, ModelSource
+import uuid
+from .value_objects import ModelCode, ModelName, ModelRastreability
 
-from .enums import ModelType
+from .enums import ModelType, ModelSource, TimeWindow
 from .events import ModelRouted
+
+from datetime import datetime,timezone
 
 class ModelRouteDefinition:
     def __init__(
         self,
-        id: RouteId,
         code: ModelCode,
         name: ModelName,
         source: ModelSource,
-        type: ModelType
+        type: ModelType,
+        time_window: TimeWindow,
+        started_at: datetime | None = None,
+        id: str | None = None,
+        created_at: datetime | None = None,
+        modified_at: datetime | None = None,
     ):
 
         self._code = code
         self._name = name
         self._type = type
         self._source = source
+        self._time_window = time_window
+        self._started_at = started_at
 
-        self._id = id
-        self._created_at = id.created_at
-        self._updated_at = self._created_at
+        self._rastreability = ModelRastreability(
+            id=id,
+            created_at=created_at,
+            modified_at=modified_at,
+        )
+
+        self.events = []
 
     @property
     def type(self) -> ModelType:
@@ -35,33 +48,35 @@ class ModelRouteDefinition:
         return self._code
     
     @property
+    def time_window(self) -> TimeWindow:
+        return self._time_window
+
+    @property
     def name(self) -> ModelName:
         return self._name
-    
+
     @property
-    def id(self) -> RouteId:
-        return self._id
-
-
+    def rastreability(self) -> ModelRastreability:
+        return self._rastreability
 
     def _record_event(self, event: ModelRouted):
-        # Placeholder for event recording logic
-        pass
+        self.events.append(event)
 
     def can_route(self, source: ModelSource) -> bool:
+        return self._source == source
 
-        can_route = self._source == source
 
-        if not can_route:
-            return False
+    def route(self, source: ModelSource) -> None:
+        if not self.can_route(source):
+            raise ValueError("Route not allowed for this source")
         
+        self.last_routed_at = datetime.now(timezone.utc)
+
         event = ModelRouted(
-            route_id=self._id,
+            rastreability=self._rastreability,
             code=self._code,
             name=self._name,
-            source=source
+            source=source,
         )
 
         self._record_event(event)
-
-        return True

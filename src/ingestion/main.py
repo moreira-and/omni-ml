@@ -51,7 +51,6 @@ def build_storage():
 @app.command()
 def main(
     days: int = typer.Option(30, help="Number of days to look back for data extraction."),
-    time_window: str = typer.Option("1d", help="Time window for data extraction.")
 ):
     """
     CLI entry point for batch data extraction.
@@ -76,8 +75,7 @@ def main(
         # DEBITE: These should be part of a configuration object BY TYPE
         params: Mapping[str, Any] = {
             "start": datetime.now(timezone.utc) - timedelta(days=days),
-            "end": datetime.now(timezone.utc),
-            "time_window": time_window,
+            "end": datetime.now(timezone.utc)
         }
 
         for route in repository.all():

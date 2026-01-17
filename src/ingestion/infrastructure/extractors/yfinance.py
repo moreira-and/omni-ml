@@ -5,7 +5,7 @@ from ....config import logger
 
 from ...domain.enums import ModelType, TimeWindow
 from ...domain.models import CandleStick
-from ...domain.value_objects import ModelSource
+from ...domain.enums import ModelSource
 from ...domain.entities import ModelRouteDefinition
 
 from ..interfaces import CandlesExtractor
@@ -24,7 +24,6 @@ class YFinanceCandlesSeries(CandlesExtractor):
             route=route,
             start=params["start"],
             end=params["end"],
-            time_window=TimeWindow(params["time_window"]),
         )
     
     def extract_between(
@@ -32,7 +31,6 @@ class YFinanceCandlesSeries(CandlesExtractor):
             route: ModelRouteDefinition,
             start:datetime,
             end:datetime,
-            time_window: TimeWindow
         ) -> Iterable[CandleStick]:
 
         # Fetch candlestick data from yfinance
@@ -40,7 +38,7 @@ class YFinanceCandlesSeries(CandlesExtractor):
 
         try:
             df_candles = yf.download(
-                route.code.value, start=start, end=end, auto_adjust=True, interval=time_window.value
+                route.code.value, start=start, end=end, auto_adjust=True, interval= route.time_window.value
             )
         except Exception as e:
             logger.error(f"Error loading {route.code.value}: {e}")
@@ -50,9 +48,9 @@ class YFinanceCandlesSeries(CandlesExtractor):
             logger.warning(f"No data returned for {route.code.value}")
         else:
             for candle in df_candles.itertuples():
-                yield self._convert_to_candlestick(route, time_window, candle)
+                yield self._convert_to_candlestick(route, candle)
 
-    def _convert_to_candlestick(self, route: ModelRouteDefinition, time_window: TimeWindow, candle) -> CandleStick:
+    def _convert_to_candlestick(self, route: ModelRouteDefinition, candle) -> CandleStick:
         # Convert a single data point from yfinance to a Candle entity
         candle = CandleStick(
             code=route.code.value,
@@ -63,7 +61,7 @@ class YFinanceCandlesSeries(CandlesExtractor):
             low=candle._3,
             open=candle._4,
             volume=candle._5,
-            time_window=time_window,
+            time_window=route.time_window,
         )
 
         return candle

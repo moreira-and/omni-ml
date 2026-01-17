@@ -2,13 +2,10 @@ from abc import ABC, abstractmethod
 from typing import Iterable
 
 from .entities import ModelRouteDefinition
-from .value_objects import ModelCode, RouteId, ModelSource
+from .enums import ModelSource
+from .value_objects import ModelCode
 
 class ModelRouteRepository(ABC):
-
-    @abstractmethod
-    def by_id(self, id: RouteId) -> ModelRouteDefinition:
-        ...
 
     @abstractmethod
     def by_code(self, code: ModelCode) -> Iterable[ModelRouteDefinition]:
