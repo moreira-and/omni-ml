@@ -1,14 +1,14 @@
 from abc import ABC, abstractmethod
 from typing import Iterable
 
-from .entities import ModelRouteDefinition
-from .enums import ModelSource
-from .value_objects import ModelCode
+from .entities import ExternalDataExtractDefinition
+from .enums import ExternalSource
+from .value_objects import ExternalCode
 
-class ModelRouteRepository(ABC):
+class ExtractDefinitionRepository(ABC):
 
     @abstractmethod
-    def by_code(self, code: ModelCode) -> Iterable[ModelRouteDefinition]:
+    def by_code(self, code: ExternalCode) -> Iterable[ExternalDataExtractDefinition]:
         """
         Retorna todas as policies associadas a um código.
         A decisão de prioridade/fallback é do domínio.
@@ -16,7 +16,7 @@ class ModelRouteRepository(ABC):
         ...
 
     @abstractmethod
-    def by_source(self, source: ModelSource) -> Iterable[ModelRouteDefinition]:
+    def by_source(self, source: ExternalSource) -> Iterable[ExternalDataExtractDefinition]:
         """
         Retorna todas as policies associadas a uma origem.
         A decisão de prioridade/fallback é do domínio.
@@ -24,5 +24,5 @@ class ModelRouteRepository(ABC):
         ...
 
     @abstractmethod
-    def save(self, route: ModelRouteDefinition) -> None:
+    def save(self, route: ExternalDataExtractDefinition) -> None:
         ...

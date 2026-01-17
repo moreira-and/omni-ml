@@ -4,7 +4,7 @@ from datetime import datetime, timezone
 from .errors import DomainError    
 
 
-class ModelRastreability:
+class InternalRastreability:
     def __init__(
         self,
         id: str | None = None,
@@ -15,7 +15,7 @@ class ModelRastreability:
         self.created_at = created_at or datetime.now(timezone.utc)
         self.modified_at = modified_at or self.created_at
 
-class ModelCode:
+class ExternalCode:
     def __init__(self, value: str):
         if not value or not value.strip():
             raise DomainError("ModelCode cannot be empty")
@@ -30,18 +30,18 @@ class ModelCode:
         return self._value
 
     def __eq__(self, other):
-        return isinstance(other, ModelCode) and self._value == other._value
+        return isinstance(other, ExternalCode) and self._value == other._value
 
     def __hash__(self):
         return hash(self._value)
 
 
-class ModelName:
-    def __init__(self, name: str):
-        if not name:
+class InternalAlias:
+    def __init__(self, value: str):
+        if not value:
             raise DomainError("ModelName requires name")
 
-        self._value = name
+        self._value = value
 
     @property
     def value(self) -> str:
@@ -49,7 +49,7 @@ class ModelName:
     
     def __eq__(self, other):
         return (
-            isinstance(other, ModelName)
+            isinstance(other, InternalAlias)
             and self._value == other._value
         )
 

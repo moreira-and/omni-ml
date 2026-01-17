@@ -5,21 +5,21 @@ from typing import Any, Mapping
 from loguru import logger
 import typer
 
-from src.ingestion.application.usecases import BatchExtractService
-from src.ingestion.application.interfaces import ExtractorRouter
+from src.external_data.application.usecases import BatchExtractService
+from src.external_data.application.interfaces import ExtractionRouter
 
-from src.ingestion.infrastructure.routing import DefaultExtractionRouter
-from src.ingestion.infrastructure.repositories import LocalRouteRepository
-from src.ingestion.infrastructure.storages import LocalResultStorage
+from src.external_data.infrastructure.routing import DefaultExtractionRouter
+from src.external_data.infrastructure.repositories import LocalRouteRepository
+from src.external_data.infrastructure.storages import LocalResultStorage
 
 
-from src.ingestion.infrastructure.extractors.yfinance import YFinanceCandlesSeries
-from src.ingestion.infrastructure.extractors.bcb import BcbLoadingStrategy
+from src.external_data.infrastructure.extractors.yfinance import YFinanceCandlesSeries
+from src.external_data.infrastructure.extractors.bcb import BcbLoadingStrategy
 
 app = typer.Typer()
 
 
-def build_router() -> ExtractorRouter:
+def build_router() -> ExtractionRouter:
     """
     Composition root for extractor routing.
 
@@ -81,11 +81,11 @@ def main(
         for route in repository.all():
             batch = service.extract_batch(route, params)
             if not batch.results:
-                logger.warning(f"No results for route ({route.type.value}, {route.source.value}, {route.name.value})")
+                logger.warning(f"No results for route ({route.data_kind.value}, {route.source.value}, {route.alias.value})")
                 continue
             else:
                 logger.success(
-                    f"Extraction completed for route ({route.type.value}, {route.source.value}, {route.name.value}) "
+                    f"Extraction completed for route ({route.data_kind.value}, {route.source.value}, {route.alias.value}) "
                 )
 
                 storage.store(batch)

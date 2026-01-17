@@ -1,18 +1,17 @@
-import uuid
-from .value_objects import ModelCode, ModelName, ModelRastreability
+from .value_objects import ExternalCode, InternalAlias, InternalRastreability
 
-from .enums import ModelType, ModelSource, TimeWindow
-from .events import ModelRouted
+from .enums import DataKind, ExternalSource, TimeWindow
+from .events import ExtractedData
 
 from datetime import datetime,timezone
 
-class ModelRouteDefinition:
+class ExternalDataExtractDefinition:
     def __init__(
         self,
-        code: ModelCode,
-        name: ModelName,
-        source: ModelSource,
-        type: ModelType,
+        code: ExternalCode,
+        alias: InternalAlias,
+        source: ExternalSource,
+        data_kind: DataKind,
         time_window: TimeWindow,
         started_at: datetime | None = None,
         id: str | None = None,
@@ -21,13 +20,13 @@ class ModelRouteDefinition:
     ):
 
         self._code = code
-        self._name = name
-        self._type = type
+        self._alias = alias
+        self._data_kind = data_kind
         self._source = source
         self._time_window = time_window
         self._started_at = started_at
 
-        self._rastreability = ModelRastreability(
+        self._rastreability = InternalRastreability(
             id=id,
             created_at=created_at,
             modified_at=modified_at,
@@ -36,15 +35,15 @@ class ModelRouteDefinition:
         self.events = []
 
     @property
-    def type(self) -> ModelType:
-        return self._type
+    def data_kind(self) -> DataKind:
+        return self._data_kind
     
     @property
-    def source(self) -> ModelSource:
+    def source(self) -> ExternalSource:
         return self._source
 
     @property
-    def code(self) -> ModelCode:
+    def code(self) -> ExternalCode:
         return self._code
     
     @property
@@ -52,30 +51,30 @@ class ModelRouteDefinition:
         return self._time_window
 
     @property
-    def name(self) -> ModelName:
-        return self._name
+    def alias(self) -> InternalAlias:
+        return self._alias
 
     @property
-    def rastreability(self) -> ModelRastreability:
+    def rastreability(self) -> InternalRastreability:
         return self._rastreability
 
-    def _record_event(self, event: ModelRouted):
+    def _record_event(self, event: ExtractedData):
         self.events.append(event)
 
-    def can_route(self, source: ModelSource) -> bool:
+    def can_route(self, source: ExternalSource) -> bool:
         return self._source == source
 
 
-    def route(self, source: ModelSource) -> None:
+    def route(self, source: ExternalSource) -> None:
         if not self.can_route(source):
             raise ValueError("Route not allowed for this source")
         
         self.last_routed_at = datetime.now(timezone.utc)
 
-        event = ModelRouted(
+        event = ExtractedData(
             rastreability=self._rastreability,
             code=self._code,
-            name=self._name,
+            alias=self._alias,
             source=source,
         )
 

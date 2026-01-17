@@ -3,10 +3,10 @@ from datetime import datetime
 
 from ....config import logger
 
-from ...domain.enums import ModelType, TimeWindow
+from ...domain.enums import DataKind
 from ...domain.models import CandleStick
-from ...domain.enums import ModelSource
-from ...domain.entities import ModelRouteDefinition
+from ...domain.enums import ExternalSource
+from ...domain.entities import ExternalDataExtractDefinition
 
 from ..interfaces import CandlesExtractor
 
@@ -16,7 +16,7 @@ import pandas as pd
 
 class YFinanceCandlesSeries(CandlesExtractor):
 
-    def extract(self, route: ModelRouteDefinition, params: Mapping[str, Any] | None = None):
+    def extract(self, route: ExternalDataExtractDefinition, params: Mapping[str, Any] | None = None):
         if not params:
             raise ValueError("CandlesExtractor requires criterious")
 
@@ -28,7 +28,7 @@ class YFinanceCandlesSeries(CandlesExtractor):
     
     def extract_between(
             self,
-            route: ModelRouteDefinition,
+            route: ExternalDataExtractDefinition,
             start:datetime,
             end:datetime,
         ) -> Iterable[CandleStick]:
@@ -50,11 +50,11 @@ class YFinanceCandlesSeries(CandlesExtractor):
             for candle in df_candles.itertuples():
                 yield self._convert_to_candlestick(route, candle)
 
-    def _convert_to_candlestick(self, route: ModelRouteDefinition, candle) -> CandleStick:
+    def _convert_to_candlestick(self, route: ExternalDataExtractDefinition, candle) -> CandleStick:
         # Convert a single data point from yfinance to a Candle entity
         candle = CandleStick(
             code=route.code.value,
-            name=route.name.value,
+            alias=route.alias.value,
             timestamp=candle.Index.to_pydatetime(),
             close=candle._1,
             high=candle._2,
@@ -68,9 +68,9 @@ class YFinanceCandlesSeries(CandlesExtractor):
 
 
     @property
-    def source(self) -> ModelSource:
-        return ModelSource("yfinance")
+    def get_by_source(self) -> ExternalSource:
+        return ExternalSource("yfinance")
     
     @property
-    def type(self) -> ModelType:
-        return ModelType.CANDLESTICK
+    def get_by_kind(self) -> DataKind:
+        return DataKind.CANDLESTICK

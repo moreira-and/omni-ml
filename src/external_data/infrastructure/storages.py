@@ -4,7 +4,7 @@ import csv
 from enum import Enum
 
 from ...config import DATA_DIR
-from ..domain.entities import ModelRouteDefinition
+from ..domain.entities import ExternalDataExtractDefinition
 from ..domain.models import ExtractionBatch
 
 
@@ -60,7 +60,7 @@ class LocalResultStorage:
     def _store_csv(
         self,
         *,
-        route: ModelRouteDefinition,
+        route: ExternalDataExtractDefinition,
         rows: list[Mapping[str, Any]],
         timestamp: str,
     ) -> None:
@@ -74,7 +74,7 @@ class LocalResultStorage:
             writer.writeheader()
             writer.writerows(rows)
 
-    def _route_directory(self, route: ModelRouteDefinition) -> Path:
-        path = self._base_path / route.source.value / route.type.value / route.name.value / route.time_window.value
+    def _route_directory(self, route: ExternalDataExtractDefinition) -> Path:
+        path = self._base_path / route.source.value / route.data_kind.value / route.alias.value / route.time_window.value
         path.mkdir(parents=True, exist_ok=True)
         return path

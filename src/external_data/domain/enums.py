@@ -1,12 +1,12 @@
 from enum import Enum
 
-class ModelType(Enum):
-    CANDLESTICK = "candlestick"
-    ECONOMIC_INDICATOR = "economic_indicator"
-
-class ModelSource(Enum):
+class ExternalSource(Enum):
     YFINANCE = "yfinance"
     BCB = "bcb"
+
+class DataKind(Enum):
+    CANDLESTICK = "candlestick"
+    ECONOMIC_INDICATOR = "economic_indicator"
 
 ## TimeWindow Enum represents various time intervals for candlestick data in trading.
 class TimeWindow(Enum):

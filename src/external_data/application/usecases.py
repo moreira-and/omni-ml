@@ -1,9 +1,9 @@
 from typing import Any, Mapping
 from datetime import datetime, timezone
 
-from ..domain.entities import ModelRouteDefinition
+from ..domain.entities import ExternalDataExtractDefinition
 from ..domain.models import ExtractionBatch
-from .interfaces import ExtractorRouter
+from .interfaces import ExtractionRouter
 
 
 class BatchExtractService:
@@ -28,12 +28,12 @@ class BatchExtractService:
     multiple routes may be processed independently within a single call.
     """
     
-    def __init__(self, router: ExtractorRouter) -> None:
+    def __init__(self, router: ExtractionRouter) -> None:
         self._router = router
 
     def extract_batch(
         self,
-        route: ModelRouteDefinition,
+        route: ExternalDataExtractDefinition,
         params: Mapping[str, Any] | None = None,
     ) -> ExtractionBatch:
 
@@ -68,8 +68,8 @@ class ExtractionService:
         self._clock = clock
         self._router = router
 
-    def extract_batch(self, route: ModelRouteDefinition) -> ExtractionBatch:
-        params = self._build_params(route.type.value)
+    def extract_batch(self, route: ExternalDataExtractDefinition) -> ExtractionBatch:
+        params = self._build_params(route.data_kind.value)
 
         extractor = self._router.get_extractor(route)
         results = extractor.extract(route, params)

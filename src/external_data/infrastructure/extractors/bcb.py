@@ -3,10 +3,10 @@ from datetime import datetime
 
 from ....config import logger
 
-from ...domain.enums import ModelType, TimeWindow
+from ...domain.enums import DataKind
 from ...domain.models import Indicator
-from ...domain.enums import ModelSource
-from ...domain.entities import ModelRouteDefinition
+from ...domain.enums import ExternalSource
+from ...domain.entities import ExternalDataExtractDefinition
 
 from ..interfaces import IndicatorExtractor
 
@@ -15,7 +15,7 @@ import requests
 
 class BcbLoadingStrategy(IndicatorExtractor):
 
-    def extract(self, route: ModelRouteDefinition, params: Mapping[str, Any] | None = None):
+    def extract(self, route: ExternalDataExtractDefinition, params: Mapping[str, Any] | None = None):
         if not params:
             raise ValueError("IndicatorExtractor requires criterious")
 
@@ -27,13 +27,13 @@ class BcbLoadingStrategy(IndicatorExtractor):
     
     def extract_between(
             self,
-            route: ModelRouteDefinition,
+            route: ExternalDataExtractDefinition,
             start:datetime,
             end:datetime,
         ) -> Iterable[Indicator]:
     
 
-        logger.info(f"Downloading {route.name.value} ({route.code.value}) from the Central Bank of Brazil API...")
+        logger.info(f"Downloading {route.alias.value} ({route.code.value}) from the Central Bank of Brazil API...")
 
         json_series = self._request_json_series(
             sgs_code=route.code.value,
@@ -67,14 +67,14 @@ class BcbLoadingStrategy(IndicatorExtractor):
         self,
         *,
         json_series: Optional[Dict],
-        route: ModelRouteDefinition,
+        route: ExternalDataExtractDefinition,
     ) -> Iterable[Indicator]:
 
         for item in json_series if json_series else []:
             try:
                 yield Indicator(
                     code=route.code.value,
-                    name=route.name.value,
+                    alias=route.alias.value,
                     timestamp=datetime.strptime(item["data"], "%d/%m/%Y"),
                     value=float(item["valor"]),
                     time_window=route.time_window,
@@ -90,9 +90,9 @@ class BcbLoadingStrategy(IndicatorExtractor):
                 )
                 continue
     @property
-    def source(self) -> ModelSource:
-        return ModelSource("bcb")
+    def get_by_source(self) -> ExternalSource:
+        return ExternalSource("bcb")
     
     @property
-    def type(self) -> ModelType:
-        return ModelType.ECONOMIC_INDICATOR
+    def get_by_kind(self) -> DataKind:
+        return DataKind.ECONOMIC_INDICATOR
