@@ -1,10 +1,11 @@
-from ..errors import DomainError  
+from ..errors import DomainError
+
 
 class ExternalCode:
     def __init__(self, value: str):
-        
-        if not value.isalnum():
-            raise DomainError("ExternalCode must be alphanumeric")
+
+        # if not value.isalnum():
+        #    raise DomainError("ExternalCode must be alphanumeric")
 
         if not value or not value.strip():
             raise DomainError("ExternalCode cannot be empty")

@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 ## TimeWindow Enum represents various time intervals for candlestick data in trading.
 class TimeWindow(Enum):
     ONE_MINUTE = "1m"

@@ -1,4 +1,5 @@
 import uuid
+
 from ..errors import DomainError
 
 

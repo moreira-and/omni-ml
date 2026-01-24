@@ -1,15 +1,11 @@
 # tests/
 
+from unittest.mock import MagicMock, patch
+
 import numpy as np
 import pytest
-from unittest.mock import patch, MagicMock
 
-from src.web.api import (
-    load_data,
-    train_model,
-    evaluate_model,
-    train,
-)
+from src.web.api import evaluate_model, load_data, train, train_model
 
 
 def test_load_data_shapes():

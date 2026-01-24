@@ -1,4 +1,5 @@
-from ..errors import DomainError    
+from ..errors import DomainError
+
 
 class InternalAlias:
     def __init__(self, value: str):
@@ -10,12 +11,9 @@ class InternalAlias:
     @property
     def value(self) -> str:
         return self._value
-    
+
     def __eq__(self, other):
-        return (
-            isinstance(other, InternalAlias)
-            and self._value == other._value
-        )
+        return isinstance(other, InternalAlias) and self._value == other._value
 
     def __hash__(self):
         return hash(self._value)
