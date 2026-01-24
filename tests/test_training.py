@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 from unittest.mock import patch, MagicMock
 
-from src.app import (
+from src.web.api import (
     load_data,
     train_model,
     evaluate_model,

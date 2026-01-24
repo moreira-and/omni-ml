@@ -5,30 +5,30 @@ from ....config import logger
 
 from ...domain.enums import DataKind
 from ...domain.models import CandleStick
-from ...domain.enums import ExternalSource
-from ...domain.entities import ExternalDataExtractDefinition
+from ...domain.enums.external_source import ExternalSource
+from ...domain.entities.extract_definition import ExtractDefinition
 
-from ..interfaces import CandlesExtractor
+from ...domain.interfaces import ExtractExecutor
 
 import  yfinance as yf
 import pandas as pd
 
 
-class YFinanceCandlesSeries(CandlesExtractor):
+class YFinanceCandlesSeries(ExtractExecutor):
 
-    def extract(self, route: ExternalDataExtractDefinition, params: Mapping[str, Any] | None = None):
+    def execute(self, definition: ExtractDefinition, params: Mapping[str, Any] | None = None):
         if not params:
             raise ValueError("CandlesExtractor requires criterious")
 
         return self.extract_between(
-            route=route,
+            definition=definition,
             start=params["start"],
             end=params["end"],
         )
     
     def extract_between(
             self,
-            route: ExternalDataExtractDefinition,
+            definition: ExtractDefinition,
             start:datetime,
             end:datetime,
         ) -> Iterable[CandleStick]:
@@ -38,19 +38,19 @@ class YFinanceCandlesSeries(CandlesExtractor):
 
         try:
             df_candles = yf.download(
-                route.code.value, start=start, end=end, auto_adjust=True, interval= route.time_window.value
+                definition.code.value, start=start, end=end, auto_adjust=True, interval= definition.time_window.value
             )
         except Exception as e:
-            logger.error(f"Error loading {route.code.value}: {e}")
+            logger.error(f"Error loading {definition.code.value}: {e}")
 
         # Convert fetched data to list of Candle entities
         if df_candles is None or df_candles.empty:
-            logger.warning(f"No data returned for {route.code.value}")
+            logger.warning(f"No data returned for {definition.code.value}")
         else:
             for candle in df_candles.itertuples():
-                yield self._convert_to_candlestick(route, candle)
+                yield self._convert_to_candlestick(definition, candle)
 
-    def _convert_to_candlestick(self, route: ExternalDataExtractDefinition, candle) -> CandleStick:
+    def _convert_to_candlestick(self, route: ExtractDefinition, candle) -> CandleStick:
         # Convert a single data point from yfinance to a Candle entity
         candle = CandleStick(
             code=route.code.value,

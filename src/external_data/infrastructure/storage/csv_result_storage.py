@@ -3,9 +3,9 @@ from typing import Any, Mapping
 import csv
 from enum import Enum
 
-from ...config import DATA_DIR
-from ..domain.entities import ExternalDataExtractDefinition
-from ..domain.models import ExtractionBatch
+from ....config import DATA_DIR
+from ...domain.entities.extract_definition import ExtractDefinition
+from ...domain.models.models import ExtractionBatch
 
 
 from dataclasses import is_dataclass, asdict
@@ -60,7 +60,7 @@ class LocalResultStorage:
     def _store_csv(
         self,
         *,
-        route: ExternalDataExtractDefinition,
+        route: ExtractDefinition,
         rows: list[Mapping[str, Any]],
         timestamp: str,
     ) -> None:
@@ -74,7 +74,7 @@ class LocalResultStorage:
             writer.writeheader()
             writer.writerows(rows)
 
-    def _route_directory(self, route: ExternalDataExtractDefinition) -> Path:
+    def _route_directory(self, route: ExtractDefinition) -> Path:
         path = self._base_path / route.source.value / route.data_kind.value / route.alias.value / route.time_window.value
         path.mkdir(parents=True, exist_ok=True)
         return path

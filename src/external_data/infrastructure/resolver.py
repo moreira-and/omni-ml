@@ -2,10 +2,10 @@ from typing import List
 
 
 
-from ..domain.entities import ExternalDataExtractDefinition
-from ..application.interfaces import DataExtractor, ExtractionRouter
-from .extractors.yfinance import YFinanceCandlesSeries
-from .extractors.bcb import BcbLoadingStrategy
+from ..domain.entities.extract_definition import ExtractDefinition
+from ..domain.interfaces import DataExtractor, ExtractionRouter
+from .extractors.yfinance_candle_extractor import YFinanceCandlesSeries
+from .extractors.bcb_candle_extractor import BcbLoadingStrategy
 
 
 class DefaultExtractionRouter(ExtractionRouter):
@@ -15,7 +15,7 @@ class DefaultExtractionRouter(ExtractionRouter):
             BcbLoadingStrategy()
         ]
 
-    def get_extractor(self, route: ExternalDataExtractDefinition) -> DataExtractor:
+    def get_extractor(self, route: ExtractDefinition) -> DataExtractor:
         for extractor in self._extractors:
             if (
                 extractor.get_by_kind == route.data_kind

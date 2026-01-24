@@ -1,20 +1,18 @@
-from  datetime import datetime, timezone, timedelta
 import time
-from typing import Any, Mapping
 
 from loguru import logger
 import typer
 
-from src.external_data.application.usecases import BatchExtractService
-from src.external_data.application.interfaces import ExtractionRouter
+from src.external_data.application.usecases import BatchExtractService, RunExternalDataExtractionBatch
+from src.external_data.domain.interfaces import ExtractionRouter
 
-from src.external_data.infrastructure.routing import DefaultExtractionRouter
-from src.external_data.infrastructure.repositories import LocalRouteRepository
-from src.external_data.infrastructure.storages import LocalResultStorage
+from src.external_data.infrastructure.resolver import DefaultExtractionRouter
+from src.external_data.infrastructure.repositories.csv_extract_definition_repository import LocalRouteRepository
+from src.external_data.infrastructure.storage.csv_result_storage import LocalResultStorage
 
 
-from src.external_data.infrastructure.extractors.yfinance import YFinanceCandlesSeries
-from src.external_data.infrastructure.extractors.bcb import BcbLoadingStrategy
+from src.external_data.infrastructure.extractors.yfinance_extraction import YFinanceCandlesSeries
+from src.external_data.infrastructure.extractors.bcb_extraction import BcbLoadingStrategy
 
 app = typer.Typer()
 
@@ -48,6 +46,12 @@ def build_storage():
     """
     return LocalResultStorage()
 
+build_extractor = lambda: BatchExtractService(build_router())
+
+def SystemClock():
+    from datetime import datetime, timezone         
+    return datetime.now(timezone.utc)
+
 @app.command()
 def main(
     days: int = typer.Option(30, help="Number of days to look back for data extraction."),
@@ -63,34 +67,14 @@ def main(
     logger.info("Starting raw data loading...")
 
     try:
-        # --- Route resolution (placeholder) -----------------
-        repository = build_repository()
-        router = build_router()
-        storage = build_storage()
+        use_case = RunExternalDataExtractionBatch(
+            repository=build_repository(),
+            extractor=build_extractor(),
+            storage=build_storage(),
+            clock=SystemClock(),
+        )      
 
-        # --- services ----------------------
-        service = BatchExtractService(router)
-
-        # --- Technical extraction parameters ----------------
-        # DEBITE: These should be part of a configuration object BY TYPE
-        params: Mapping[str, Any] = {
-            "start": datetime.now(timezone.utc) - timedelta(days=days),
-            "end": datetime.now(timezone.utc)
-        }
-
-        for route in repository.all():
-            batch = service.extract_batch(route, params)
-            if not batch.results:
-                logger.warning(f"No results for route ({route.data_kind.value}, {route.source.value}, {route.alias.value})")
-                continue
-            else:
-                logger.success(
-                    f"Extraction completed for route ({route.data_kind.value}, {route.source.value}, {route.alias.value}) "
-                )
-
-                storage.store(batch)
-
-        logger.success("Raw data loading completed successfully.")        
+        use_case.execute(lookback_days=days)
 
     except Exception as e:
         logger.exception("Raw data loading failed")
