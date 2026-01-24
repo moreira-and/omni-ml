@@ -5,7 +5,11 @@ def build_sys_clock():
 
 
 def load_extract_config():
-    return {"start": "2025-01-01", "end": "2026-01-01"}
+    from ...config import read_yaml
+
+    config = read_yaml("config/external_data_params.yaml")
+    config_by_kind = {key: value for key, value in config.items()}
+    return config_by_kind
 
 
 def build_definition_repository():

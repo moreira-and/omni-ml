@@ -1,6 +1,6 @@
 from ...domain.entities import ExtractDefinition
+from ...domain.models.params import ExtractParams
 from ..interfaces import ExtractParamsResolver
-from ...domain.params import ExtractParams
 
 
 class PrepareExtractionParams:

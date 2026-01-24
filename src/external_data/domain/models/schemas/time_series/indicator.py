@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from datetime import datetime
 
-from ...enums import TimeWindow
+from ....enums import TimeWindow
 from ..base import DomainModel
 
 

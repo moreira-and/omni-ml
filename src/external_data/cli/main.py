@@ -31,22 +31,16 @@ def main():
         _clock = build_sys_clock()
         _config = load_extract_config()
 
-        _list_definitions = ListExtractDefinitions(
-            definitions_repo=build_definition_repository()
-        )
+        _list_definitions = ListExtractDefinitions(definitions_repo=build_definition_repository())
 
-        _prepare_params = PrepareExtractionParams(
-            params_resolver=build_extract_param_resolver()
-        )
+        _prepare_params = PrepareExtractionParams(params_resolver=build_extract_param_resolver())
 
         _execute_batch = ExecuteBatchExtract(
             executor_resolver=build_extractor_resolver(),
             clock=_clock,
         )
 
-        _store_batch = StoreExtractBatch(
-            result_store=build_result_storage()
-        )
+        _store_batch = StoreExtractBatch(result_store=build_result_storage())
 
         use_case = ExecuteAllExtractions(
             list_definitions=_list_definitions,

@@ -1,13 +1,14 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any
 
 from ...domain.entities import ExtractDefinition
 from ...domain.enums import DataKind
 from ...domain.errors import DomainError
+from ...domain.models.params import TimeRange
+from ...domain.models.params.base import ExtractParams
 from ..clocks import Clock
+from ..errors import ApplicationError
 from ..interfaces import ExtractParamsResolver
-from ...domain.params import TimeRange
-from ...domain.params.base import ExtractParams
 
 
 class DefaultExtractParamsResolver(ExtractParamsResolver):
@@ -20,11 +21,16 @@ class DefaultExtractParamsResolver(ExtractParamsResolver):
         config: dict[str, Any],
     ) -> ExtractParams:
 
+        raw = config.get(definition.data_kind.value)
+
+        if raw is None:
+            raise ApplicationError(f"Missing config for data kind: {definition.data_kind}")
+
         if definition.data_kind == DataKind.CANDLESTICK:
-            return self._build_time_range(config)
+            return self._build_time_range(raw)
 
         if definition.data_kind == DataKind.ECONOMIC_INDICATOR:
-            return self._build_time_range(config)
+            return self._build_time_range(raw)
 
         raise DomainError(f"No ExtractionParams available for data kind {definition.data_kind}")
 
@@ -44,11 +50,11 @@ class DefaultExtractParamsResolver(ExtractParamsResolver):
         )
 
     def _parse_datetime(self, value: Any) -> datetime | None:
-        if value is None:
-            return None
         if isinstance(value, datetime):
-            return value
-        if isinstance(value, str):
-            return datetime.fromisoformat(value)
+            return value if value.tzinfo is not None else value.replace(tzinfo=timezone.utc)
 
-        raise DomainError("Invalid datetime value")
+        if isinstance(value, str):
+            dt = datetime.fromisoformat(value)
+            return dt if dt.tzinfo is not None else dt.replace(tzinfo=timezone.utc)
+
+        return None

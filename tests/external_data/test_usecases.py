@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-import sys
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
+import sys
 from unittest.mock import MagicMock
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
@@ -11,17 +11,29 @@ sys.path.append(str(PROJECT_ROOT))
 
 from src.external_data.application.clocks.fixed_clock import FixedClock
 from src.external_data.application.errors import ApplicationError
-from src.external_data.application.usecases.execute_all_extractions import ExecuteAllExtractions
-from src.external_data.application.usecases.execute_batch_extract import ExecuteBatchExtract
-from src.external_data.application.usecases.list_extract_definitions import ListExtractDefinitions
-from src.external_data.application.usecases.prepare_extraction_params import PrepareExtractionParams
+from src.external_data.application.usecases.execute_all_extractions import (
+    ExecuteAllExtractions,
+)
+from src.external_data.application.usecases.execute_batch_extract import (
+    ExecuteBatchExtract,
+)
+from src.external_data.application.usecases.list_extract_definitions import (
+    ListExtractDefinitions,
+)
+from src.external_data.application.usecases.prepare_extraction_params import (
+    PrepareExtractionParams,
+)
 from src.external_data.application.usecases.store_extract_batch import StoreExtractBatch
 from src.external_data.domain.entities import ExtractDefinition
 from src.external_data.domain.enums import DataKind, ExternalSource, TimeWindow
-from src.external_data.domain.models import ExtractBatch
-from src.external_data.domain.models.base import DomainModel
-from src.external_data.domain.params import TimeRange
-from src.external_data.domain.value_objects import DefinitionId, ExternalCode, InternalAlias
+from src.external_data.domain.models.batchs import ExtractBatch
+from src.external_data.domain.models.params import TimeRange
+from src.external_data.domain.models.schemas.base import DomainModel
+from src.external_data.domain.value_objects import (
+    DefinitionId,
+    ExternalCode,
+    InternalAlias,
+)
 
 
 @dataclass
@@ -92,7 +104,7 @@ def test_execute_batch_extract_builds_batch_and_marks_requested():
     assert batch.executed_at == clock.now()
     assert len(definition.pull_events()) == 1
     resolver.resolve.assert_called_once_with(definition)
-    executor.execute.assert_called_once_with(definition, params)
+    executor.execute.assert_called_once_with(definition, params, clock=clock)
 
 
 def test_store_extract_batch_calls_result_store():

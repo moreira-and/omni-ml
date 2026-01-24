@@ -3,8 +3,8 @@ from datetime import datetime
 
 from src.external_data.domain.errors import DomainError
 
-from ...enums import TimeWindow
-from ..base import DomainModel
+from ....enums import TimeWindow
+from ...schemas.base import DomainModel
 
 
 @dataclass(frozen=True)
@@ -24,10 +24,11 @@ class CandleStick(DomainModel):
     volume: float
 
     def __post_init__(self):
-        if self.high < max(self.open, self.close):
-            pass
-            # raise DomainError("Invalid candle: high is too low")
+        corrected_high = max(self.high, self.open, self.close)
+        corrected_low = min(self.low, self.open, self.close)
 
-        if self.low < min(self.open, self.close):
-            pass
-            # raise DomainError("Invalid candle: high is too low")
+        object.__setattr__(self, "high", corrected_high)
+        object.__setattr__(self, "low", corrected_low)
+
+        if corrected_high < corrected_low:
+            raise DomainError("Invalid candle after correction")

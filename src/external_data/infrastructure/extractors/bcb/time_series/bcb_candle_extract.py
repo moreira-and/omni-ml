@@ -4,24 +4,40 @@ from typing import Any, Dict, Iterable, Mapping, Optional
 import requests
 
 from ......config import logger
+from .....application.clocks import Clock
 from .....application.interfaces import ExtractExecutor
-from .....domain.params import TimeRange
 from .....domain.entities.extract_definition import ExtractDefinition
 from .....domain.enums import DataKind
 from .....domain.enums.external_source import ExternalSource
-from .....domain.models.time_series import Indicator
+from .....domain.models.params import TimeRange
+from .....domain.models.schemas.time_series import Indicator
 
 
 class BcbIndicatorExtract(ExtractExecutor):
 
-    def execute(self, definition: ExtractDefinition, params: TimeRange) -> Iterable[Indicator]:
+    def execute(
+        self, definition: ExtractDefinition, params: TimeRange, clock: Clock
+    ) -> Iterable[Indicator]:
         if not params:
             raise ValueError("Extractor requires criterious")
 
+        _start = params.start
+        _end = params.end
+        _now = clock.now()
+
+        if _end > _now:
+            logger.warning(f"end param adjusted because end > now: " f"{_end} → {_now}")
+            _end = _now
+
+        # --- Sanity check: start must not be after end
+        if _start > _end:
+            logger.warning(f"end param adjusted because start > end: " f"{_end} → {_start}")
+            _end = _start
+
         return self.extract_between(
             definition=definition,
-            start=params.start,
-            end=params.end,
+            start=_start,
+            end=_end,
         )
 
     def extract_between(
@@ -40,6 +56,9 @@ class BcbIndicatorExtract(ExtractExecutor):
         )
 
         indicators = self._parse_indicators(json_series=json_series, definition=definition)
+
+        logger.success(f"{definition.alias.value} ({definition.code.value}) extracted! ")
+
         return indicators
 
     def _request_json_series(

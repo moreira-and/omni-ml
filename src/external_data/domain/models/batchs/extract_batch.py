@@ -1,8 +1,8 @@
 from datetime import datetime
 
-from ..entities.extract_definition import ExtractDefinition
-from .base import DomainModel
+from ...entities.extract_definition import ExtractDefinition
 from ..params import ExtractParams
+from ..schemas.base import DomainModel
 
 
 class ExtractBatch:

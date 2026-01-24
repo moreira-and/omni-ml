@@ -1,5 +1,5 @@
 from ....config import logger
-from ...domain.models import ExtractBatch
+from ...domain.models.batchs import ExtractBatch
 from ..clocks import Clock
 from ..errors import ApplicationError
 from ..interfaces import ExtractExecutorResolver
@@ -18,7 +18,7 @@ class ExecuteBatchExtract:
         try:
             executor = self._executor_resolver.resolve(definition)
 
-            results = list(executor.execute(definition, params))
+            results = list(executor.execute(definition, params, clock=self._clock))
             if not results:
                 raise ApplicationError("Extraction returned no results")
 

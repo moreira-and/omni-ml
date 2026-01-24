@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from ...domain.models import ExtractBatch
+from ...domain.models.batchs import ExtractBatch
 
 
 class ExtractResultStore(ABC):

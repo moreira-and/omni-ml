@@ -2,7 +2,7 @@ from typing import Iterable
 
 import pandas as pd
 
-from ....config import DATA_DIR, Path
+from ....config import CONFIG_DIR, Path
 from ...application.interfaces import ExtractDefinitionRepository
 from ...domain.entities.extract_definition import ExtractDefinition
 from ...domain.enums import DataKind, ExternalSource, TimeWindow
@@ -13,7 +13,7 @@ class LocalCsvExtractDefinitionRepository(ExtractDefinitionRepository):
 
     @property
     def path(self) -> Path:
-        return DATA_DIR / "external_data_extract_definition.csv"
+        return CONFIG_DIR / "external_data_extract_definition.csv"
 
     def find_by_code(self, code: ExternalCode) -> Iterable[ExtractDefinition]:
         """

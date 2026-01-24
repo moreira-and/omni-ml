@@ -7,8 +7,8 @@ from typing import Any, Mapping
 from ....config import DATA_DIR
 from ...application.interfaces import ExtractResultStore
 from ...domain.entities import ExtractDefinition
-from ...domain.models import ExtractBatch
-from ...domain.models.base import DomainModel
+from ...domain.models.batchs import ExtractBatch
+from ...domain.models.schemas.base import DomainModel
 
 
 def to_row(item: Any) -> Mapping[str, Any]:
