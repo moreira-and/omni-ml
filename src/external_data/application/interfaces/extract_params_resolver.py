@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 
 from ...domain.entities import ExtractDefinition
-from ..params import ExtractParams
+from ...domain.params import ExtractParams
 
 
 class ExtractParamsResolver(ABC):

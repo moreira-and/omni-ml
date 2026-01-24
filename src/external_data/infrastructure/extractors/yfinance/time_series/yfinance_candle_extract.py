@@ -6,7 +6,7 @@ import yfinance as yf
 
 from ......config import logger
 from .....application.interfaces import ExtractExecutor
-from .....application.params import TimeRange
+from .....domain.params import TimeRange
 from .....domain.entities.extract_definition import ExtractDefinition
 from .....domain.enums import DataKind
 from .....domain.enums.external_source import ExternalSource
