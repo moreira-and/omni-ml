@@ -1,8 +1,7 @@
 from datetime import datetime
-from typing import Iterable
 
-from ...domain.entities.extract_definition import ExtractDefinition
-from ...domain.models.base import DomainModel
+from ..entities.extract_definition import ExtractDefinition
+from .base import DomainModel
 from ..params import ExtractParams
 
 

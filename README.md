@@ -1,205 +1,115 @@
-Below is a **clean, professional, and production-ready README**, rewritten in **clear technical English**, keeping your intent and structure but removing informal phrasing, redundancy, and ambiguity.
-
-You can replace your current `README.md` entirely with this.
-
----
-
 # omni-ml
 
-<a target="_blank" href="https://cookiecutter-data-science.drivendata.org/">
-    <img src="https://img.shields.io/badge/CCDS-Project%20template-328F97?logo=cookiecutter" />
-</a>
-
-<div style="display: flex; gap: 8px; margin-top: 8px;">
-
-  <a href="https://www.youtube.com/playlist?list=PL3iMuuZjTaTJu01noBWHrLnX1ayRrzTiu" target="_blank">
-    <img src="https://img.shields.io/badge/YouTube-red?style=for-the-badge&logo=youtube&logoColor=white" alt="YouTube"/>
-  </a>
-
-  <a href="https://www.linkedin.com/in/moreira-and/" target="_blank">
-    <img src="https://img.shields.io/badge/LinkedIn-blue?style=for-the-badge&logo=linkedin&logoColor=white" alt="LinkedIn"/>
-  </a>
-
-  <a href="https://github1s.com/moreira-and/omni-ml/" target="_blank">
-    <img src="https://img.shields.io/badge/VS_Code-007ACC?style=for-the-badge&logo=visual-studio-code&logoColor=white" alt="VS Code"/>
-  </a>
-
-</div>
+Base modular para projetos de Machine Learning com foco em **extração de dados externos** e organização em camadas (domínio, aplicação e infraestrutura). A proposta é oferecer uma fundação sustentável para evolução de pipelines analíticos, mantendo o domínio independente de detalhes técnicos.
 
 ---
 
-## Overview
+## Visão geral da arquitetura
 
-**omni-ml** is a modular, end-to-end Machine Learning project template based on
-**Cookiecutter Data Science (CCDS)**, designed to support the full ML lifecycle:
+A estrutura segue princípios de DDD e Clean Architecture:
 
-* data ingestion and preparation
-* feature engineering
-* preprocessing pipelines
-* model training and evaluation
-* inference and explainability
-* experiment tracking and reproducibility
+- **Domínio (`src/external_data/domain`)**: entidades, value objects, enums, eventos e modelos de domínio.
+- **Aplicação (`src/external_data/application`)**: casos de uso e contratos (interfaces) que orquestram o fluxo.
+- **Infraestrutura (`src/external_data/infrastructure`)**: integração com APIs externas, armazenamento e repositórios.
+- **CLI (`src/external_data/cli`)**: ponto de entrada que monta dependências (composition root).
 
-The project emphasizes:
-
-* clear separation of concerns
-* reproducible builds
-* containerized execution
-* production-oriented workflows
+As dependências sempre apontam para dentro: infraestrutura depende de aplicação e domínio; aplicação depende apenas do domínio; domínio não depende de nada externo.
 
 ---
 
-## Conceptual Pipeline
+## Fluxo principal (extração)
 
-```mermaid
-flowchart LR
-    A["«interface»<br><b>dataset</b>"] --> B["«interface»<br><b>feature</b>"]
-    B --> C["«interface»<br><b>preprocess</b>"]
-    C --> D["«interface»<br><b>train</b>"]
-    D --> E["«interface»<br><b>evaluate</b>"]
-    E --> F["«interface»<br><b>infer</b>"]
-    F --> G["«interface»<br><b>explain</b>"]
+1. **CLI** inicia a execução.
+2. O **composition root** monta repositórios, resolvers e storages.
+3. `ExecuteAllExtractions` coordena o ciclo:
+   - lista definições
+   - resolve parâmetros
+   - executa extração em lote
+   - persiste os resultados
 
-    style A fill:#dae8fc,stroke:#6c8ebf,stroke-width:2px
-    style B fill:#dae8fc,stroke:#6c8ebf,stroke-width:2px
-    style C fill:#dae8fc,stroke:#6c8ebf,stroke-width:2px
-    style D fill:#d5e8d4,stroke:#82b366,stroke-width:2px
-    style E fill:#d5e8d4,stroke:#82b366,stroke-width:2px
-    style F fill:#dae8fc,stroke:#6c8ebf,stroke-width:2px
-    style G fill:#d5e8d4,stroke:#82b366,stroke-width:2px
+---
+
+## Estrutura do projeto
+
+```
+├── LICENSE
+├── Makefile
+├── README.md
+├── config/
+├── docker/
+│   ├── docker-compose.yml
+│   └── dockerfile.api
+├── pyproject.toml
+├── poetry.lock
+├── setup.cfg
+├── src/
+│   ├── __init__.py
+│   ├── config.py
+│   └── external_data/
+│       ├── cli/
+│       ├── domain/
+│       ├── application/
+│       └── infrastructure/
+└── tests/
+    ├── external_data/
+    │   └── test_usecases.py
+    ├── test_true.py
+    └── test_training.py
 ```
 
-This flow represents the logical contracts between stages, not a specific implementation.
-
 ---
 
-## Development Setup (Local)
+## Execução local
 
-### Requirements
+### Pré-requisitos
 
-* Python 3.10+
-* Poetry
+- Python 3.10+
+- Poetry
 
-### Installation
+### Instalação
 
 ```bash
 poetry config virtualenvs.in-project true --local
 poetry install
 ```
 
-This creates an isolated virtual environment and installs all project dependencies.
+### Executar a CLI de extração
+
+```bash
+python -m src.external_data.cli.main
+```
 
 ---
 
-## Local Deployment (Docker + Make)
-
-### Prerequisites
-
-* [Docker & Docker Compose](https://www.docker.com/)
-* `make`
-* [Poetry](https://python-poetry.org/)
-
-> On Windows, it is recommended to use **WSL** or **Git Bash** for `make`.
-
----
-
-### Run the full stack
+## Docker
 
 ```bash
 make up
 ```
 
-### What this command does
-
-1. `poetry build`
-   Builds the project as a Python wheel (`.whl`).
-
-2. `docker compose build`
-   Builds Docker images using the generated wheel.
-
-3. `docker compose up -d`
-   Starts all services in detached mode.
-
----
-
-### Stop or clean the environment
+Para parar ou limpar:
 
 ```bash
-make down     # Stop containers
-make clean    # Stop containers and remove volumes
+make down
+make clean
 ```
 
 ---
 
-### Notes
+## Testes
 
-* Always run `make up` from the **project root**.
-* Docker Compose configuration lives in:
-
-  ```
-  docker/docker-compose.yml
-  ```
-
----
-
-## Project Structure
-
-```
-├── LICENSE                 <- Open-source license
-├── Makefile                <- Convenience commands (build, up, down, clean)
-├── README.md               <- Project documentation
-├── docker/
-│   ├── docker-compose.yml  <- Service orchestration
-│   └── dockerfile.api      <- API container definition
-│
-├── data/
-│   ├── external            <- Third-party data sources
-│   ├── interim             <- Intermediate transformed data
-│   ├── processed           <- Final datasets for modeling
-│   └── raw                 <- Immutable raw data
-│
-├── docs/                   <- Documentation (mkdocs-ready)
-│
-├── models/                 <- Trained and serialized models
-│
-├── notebooks/              <- Exploratory and experimental notebooks
-│
-├── references/             <- Manuals, data dictionaries, external docs
-│
-├── reports/
-│   └── figures             <- Generated plots and figures
-│
-├── pyproject.toml          <- Project metadata and dependency definitions
-├── poetry.lock             <- Locked dependency versions
-│
-└── src/                    <- Application and ML source code
-    ├── __init__.py
-    ├── config.py           <- Configuration and environment handling
-    ├── dataset.py          <- Data ingestion logic
-    ├── features.py         <- Feature engineering
-    ├── modeling/
-    │   ├── __init__.py
-    │   ├── train.py        <- Model training
-    │   └── predict.py      <- Inference logic
-    └── plots.py            <- Visualization utilities
+```bash
+pytest tests/external_data/test_usecases.py
 ```
 
----
-
-## Design Principles
-
-* **Reproducibility first** (locked dependencies, wheel-based builds)
-* **Clear separation** between development, build, and runtime
-* **Infrastructure as code** via Docker and Compose
-* **Scalable by design**, not by accident
+> Observação: `tests/test_training.py` referencia módulos ainda não presentes em `src/`. Ajuste ou remova se precisar de uma suíte consistente.
 
 ---
 
-If you want, next steps could be:
+## Como evoluir
 
-* adding a **CI/CD pipeline section**
-* documenting **MLflow usage**
-* introducing **environment profiles (dev/staging/prod)**
-* or aligning this README with **Clean Architecture / DDD terminology**
+- Novos extractors devem implementar `ExtractExecutor` na camada de infraestrutura.
+- Novos params devem ser modelados no domínio e resolvidos via `ExtractParamsResolver`.
+- Novos storages devem implementar `ExtractResultStore`.
 
-Just say the word.
+Mais detalhes estão em `CONTRIBUTING.md`.

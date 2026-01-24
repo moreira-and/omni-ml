@@ -6,8 +6,8 @@ from ...domain.enums import DataKind
 from ...domain.errors import DomainError
 from ..clocks import Clock
 from ..interfaces import ExtractParamsResolver
-from ..params import TimeRange
-from ..params.base import ExtractParams
+from ...domain.params import TimeRange
+from ...domain.params.base import ExtractParams
 
 
 class DefaultExtractParamsResolver(ExtractParamsResolver):

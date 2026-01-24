@@ -1,5 +1,5 @@
 from ....config import logger
-from ...domain.entities import ExtractBatch
+from ...domain.models import ExtractBatch
 from ..errors import ApplicationError
 from ..interfaces import ExtractResultStore
 
