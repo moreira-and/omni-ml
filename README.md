@@ -1,9 +1,3 @@
-Below is a **clean, professional, and production-ready README**, rewritten in **clear technical English**, keeping your intent and structure but removing informal phrasing, redundancy, and ambiguity.
-
-You can replace your current `README.md` entirely with this.
-
----
-
 # omni-ml
 
 Base modular para projetos de Machine Learning com foco em **extração de dados externos** e organização em camadas (domínio, aplicação e infraestrutura). A proposta é oferecer uma fundação sustentável para evolução de pipelines analíticos, mantendo o domínio independente de detalhes técnicos.
