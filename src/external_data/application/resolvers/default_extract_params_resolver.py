@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import datetime
 from typing import Any
 
 from ...domain.entities import ExtractDefinition
@@ -6,7 +6,7 @@ from ...domain.enums import DataKind
 from ...domain.errors import DomainError
 from ...domain.models.params import TimeRange
 from ...domain.models.params.base import ExtractParams
-from ..clocks import Clock
+from ..clocks import Clock, ensure_utc
 from ..errors import ApplicationError
 from ..interfaces import ExtractParamsResolver
 
@@ -51,10 +51,10 @@ class DefaultExtractParamsResolver(ExtractParamsResolver):
 
     def _parse_datetime(self, value: Any) -> datetime | None:
         if isinstance(value, datetime):
-            return value if value.tzinfo is not None else value.replace(tzinfo=timezone.utc)
+            return ensure_utc(value)
 
         if isinstance(value, str):
             dt = datetime.fromisoformat(value)
-            return dt if dt.tzinfo is not None else dt.replace(tzinfo=timezone.utc)
+            return ensure_utc(dt)
 
         return None

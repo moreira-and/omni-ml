@@ -11,19 +11,6 @@ from ...domain.models.batchs import ExtractBatch
 from ...domain.models.schemas.base import DomainModel
 
 
-def to_row(item: Any) -> Mapping[str, Any]:
-    if isinstance(item, Mapping):
-        return {k: v.value if isinstance(v, Enum) else v for k, v in item.items()}
-
-    if is_dataclass(item) and not isinstance(item, type):
-        return {k: (v.value if isinstance(v, Enum) else v) for k, v in asdict(item).items()}
-
-    if hasattr(item, "__dict__"):
-        return {k: (v.value if isinstance(v, Enum) else v) for k, v in vars(item).items()}
-
-    raise TypeError(f"Cannot serialize item of type {type(item).__name__} to CSV row")
-
-
 class LocalCsvResultStorage(ExtractResultStore):
     def __init__(
         self,
@@ -75,4 +62,13 @@ class LocalCsvResultStorage(ExtractResultStore):
         Converts a DomainModel into a flat dict suitable for CSV output.
         Infrastructure concern only.
         """
-        return vars(model)
+        if isinstance(model, Mapping):
+            return {k: v.value if isinstance(v, Enum) else v for k, v in model.items()}
+
+        if is_dataclass(model) and not isinstance(model, type):
+            return {k: (v.value if isinstance(v, Enum) else v) for k, v in asdict(model).items()}
+
+        if hasattr(model, "__dict__"):
+            return {k: (v.value if isinstance(v, Enum) else v) for k, v in vars(model).items()}
+
+        raise TypeError(f"Cannot serialize item of type {type(model).__name__} to CSV row")

@@ -1,4 +1,5 @@
 code,alias,source,kind,time_window
+USDJPY,UsdJpy,metatrader5,candlestick,1m
 11,SELIC,bcb,economic_indicator,1M
 12,CDI,bcb,economic_indicator,1M
 1178,SELIC_Anual,bcb,economic_indicator,1y

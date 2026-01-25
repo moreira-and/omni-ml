@@ -10,6 +10,7 @@ from loguru import logger
 PROJ_ROOT = Path(__file__).resolve().parents[1]
 logger.info(f"PROJ_ROOT path is: {PROJ_ROOT}")
 
+MT5_SECRETS = PROJ_ROOT / "config/.env.secrets.mt5"
 CONFIG_DIR = PROJ_ROOT / "config"
 DATA_DIR = PROJ_ROOT / "data"
 RAW_DATA_DIR = DATA_DIR / "raw"
@@ -22,6 +23,32 @@ try:
     logger.add(lambda msg: tqdm.write(msg, end=""), colorize=True)
 except ModuleNotFoundError:
     pass
+
+from pathlib import Path
+from typing import Dict
+
+from dotenv import dotenv_values
+
+
+def load_secrets(path: str | Path) -> Dict[str, Dict[str, str]]:
+    if not Path(path).exists():
+        raise FileNotFoundError(f"Secrets file not found: {path}")
+
+    raw = dotenv_values(path)
+
+    secrets: Dict[str, Dict[str, str]] = {}
+
+    for key, value in raw.items():
+        if value is None:
+            continue
+
+        namespace, _, name = key.lower().partition("_")
+        if not _:
+            continue  # ignora chaves sem namespace
+
+        secrets.setdefault(namespace, {})[name] = value
+
+    return secrets
 
 
 def read_yaml(path: str):

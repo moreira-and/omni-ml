@@ -15,6 +15,8 @@ class ExecuteBatchExtract:
         self._clock = clock
 
     def execute(self, definition, params) -> ExtractBatch:
+        requested_at = self._clock.now()
+
         try:
             executor = self._executor_resolver.resolve(definition)
 
@@ -34,4 +36,4 @@ class ExecuteBatchExtract:
             raise
 
         finally:
-            definition.mark_as_requested(self._clock.now())
+            definition.mark_as_requested(requested_at)

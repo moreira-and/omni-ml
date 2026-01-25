@@ -24,10 +24,10 @@ def build_extractor_resolver():
     return DefaultExtractExecutorResolver(build_extract_executors())
 
 
-def build_extract_param_resolver():
+def build_extract_param_resolver(clock=None):
     from ..application.resolvers import DefaultExtractParamsResolver
 
-    return DefaultExtractParamsResolver(build_sys_clock())
+    return DefaultExtractParamsResolver(clock or build_sys_clock())
 
 
 def build_result_storage():
@@ -38,6 +38,7 @@ def build_result_storage():
 
 def build_extract_executors():
     from .extractors.bcb.time_series import BcbIndicatorExtract
+    from .extractors.mt5.time_series import MT5CandleExtract
     from .extractors.yfinance.time_series import YFinanceCandleExtract
 
-    return [YFinanceCandleExtract(), BcbIndicatorExtract()]
+    return [YFinanceCandleExtract(), BcbIndicatorExtract(), MT5CandleExtract()]

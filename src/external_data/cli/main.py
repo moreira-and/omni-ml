@@ -33,7 +33,9 @@ def main():
 
         _list_definitions = ListExtractDefinitions(definitions_repo=build_definition_repository())
 
-        _prepare_params = PrepareExtractionParams(params_resolver=build_extract_param_resolver())
+        _prepare_params = PrepareExtractionParams(
+            params_resolver=build_extract_param_resolver(clock=_clock)
+        )
 
         _execute_batch = ExecuteBatchExtract(
             executor_resolver=build_extractor_resolver(),

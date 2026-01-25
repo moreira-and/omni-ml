@@ -49,8 +49,8 @@ class ExtractDefinition:
     def time_window(self) -> TimeWindow:
         return self._time_window
 
-    def mark_as_requested(self, clock: datetime) -> None:
-        self._events.append(ExtractRequested(self._id, clock))
+    def mark_as_requested(self, requested_at: datetime) -> None:
+        self._events.append(ExtractRequested(self._id, requested_at))
 
     def pull_events(self) -> list[ExtractRequested]:
         events = self._events[:]
